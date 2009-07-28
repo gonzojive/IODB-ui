@@ -1,0 +1,42 @@
+(in-package :iodb-ui)
+
+(defsail tab-container-sail ()
+  ()
+  (:documentation "This is a sail that contains the entire tab system, from the tab bar
+to the pane that changes when different tabs are clicked.")
+  (:html
+   #L(cl-who:with-html-output-to-string (stream)
+       (:div
+	:class "tab-sail"
+	(:div
+	 :class "tab-header"
+	 (:ul :class "tabs" :field (ps:symbol-to-js-string :tabs)))
+	(:div :field (ps:symbol-to-js-string :tab-content))))))
+
+(defsail tab-header-sail ()
+  ((tab-title :initarg :title :initform ""))
+  (:documentation "This is the sail that contains an individual tab heading in the tab system")
+  (:html
+   #L(cl-who:with-html-output-to-string (stream)
+       (:li (:a :field (ps:symbol-to-js-string :title)
+		:href "#"
+		"")))))
+
+(defclass tab-selected-event (event)
+  ((tab-header :initarg :tab-header :accessor event-tab-header))
+  (:documentation "Event fires when a tab is selected"))
+
+(defmethod event-fired ((sail tab-header-sail) (ev tab-selected-event))
+  (log "Tab selected!!!!")
+  (setf (slot-value sail 'view 'dom :content-editable) t))
+
+(defmethod post-render ((sail tab-header-sail))
+  (log "Post render tab header")
+  (call-next-method)
+  (log sail)
+  (log (slot-value sail 'view 'dom :root))
+  (register-dom-event-handler (slot-value sail 'view 'dom :root)
+			      "click"
+			      (lambda (ev)
+				(make-instance tab-selected-event :origin sail :tab-header sail))))
+  

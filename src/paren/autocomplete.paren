@@ -1,0 +1,272 @@
+(in-package :iodb-ui)
+
+(defvar *tab-key* 9)
+(defvar *escape-key* 27)
+(defvar *enter-key* 13)
+(defvar *up-key* 38)
+(defvar *down-key* 40)
+(defvar *page-up-key* 33)
+(defvar *page-down-key* 34)
+
+(defun get-key-code (event)
+  (return (or (and event (slot-value event :key-code))
+	      (and (slot-value js-global::window :event)
+		   (slot-value js-global::window :event :key-code)))))
+
+(defun disable-native-autocomplete (elem)
+  (methcall :set-attribute elem "autocomplete" "off"))
+
+(defun elem-absolute-position (elem)
+  (let* ((el elem)
+	 (x 0)
+	 (y (slot-value el :offset-height)))
+    ;; walk up the DOM tree until we get to BODY tag
+    (while (and (slot-value el :offset-parent)
+		(!= (methcall :to-upper-case (slot-value el :tag-name)) "BODY"))
+      (incf x (slot-value el :offset-left))
+      (incf y (slot-value el :offset-top))
+      (setf el (slot-value el :offset-parent)))
+
+
+    (incf x (slot-value el :offset-left))
+    (incf y (slot-value el :offset-top))
+
+    (return (array x y))))
+
+(defun set-elem-absolute-position (elem x y)
+  (setf (slot-value elem :style :position) "absolute")
+  (setf (slot-value elem :style :left) (+ x "px"))
+  (setf (slot-value elem :style :top) (+ y "px")))
+
+(defsail autocomplete-list ()
+  ()
+  (:documentation "This is the sail that contains an individual tab heading in the tab system")
+  (:html
+   #L(cl-who:with-html-output-to-string (stream)
+       (:div :field "root"
+	     :class "autocomplete"
+	     (:ul :field "items"
+		  (:li) (:li) (:li) (:li) (:li) (:li) (:li) (:li))))))
+
+
+(defun clamp-to-range (num min max)
+  (return (cond ((> min num) min)
+		((> num max) max)
+		(t num))))
+
+(defun autocomplete-input (elem data-callback selected-item-callback entered-item-callback)
+  "This function creates an autocompletion field from the given input HTML element and callbacks.
+
+DATA-CALLBACK is a function that accepts 1 argument:
+   1.  the value of the input field
+and returns an array of data items of the form
+   (display-string value-string)
+
+SELECTED-ITEM-CALLBACK is called when an item is selected from the autocomplete input.  It is
+called with a single argument, which is the value string for that item.
+"
+  (disable-native-autocomplete elem)
+  (let* ((ac-list (make-instance autocomplete-list))
+	 (selected-data nil)
+	 (selected-data-index -1)
+	 (selected-li-index -1)
+	 (top-data-index 0)
+	 (list-items nil)
+	 (num-list-items-displayed 0)
+	 (data nil)
+	 (last-update-input-value nil)
+	 (update-data (lambda ()	
+			(let ((val (slot-value elem :value)))
+			  ;; ensure that this is different than the last time we called the callback
+			  (when (!== val last-update-input-value)
+			    ;; update the data based on the input value
+			    ;(log (+ "Updating data! value: " val))
+			    (setf last-update-input-value val)
+			    (setf data (data-callback val))
+
+			    (if (> (length data) 0)
+				;; if we actually get any data back
+				(progn
+				  (setf selected-data-index -1)
+				  (setf selected-data (elt data selected-data-index))
+				  ;; update the display
+				  (setf top-data-index 0)
+				  (setf selected-li-index -1)
+				  (update-list-display))
+
+				(progn
+				  (log "No results!")))))))
+	 (update-list-display (lambda ()
+				(setf num-list-items-displayed 0)
+				(dotimes (i (length list-items))
+				  (let ((li (elt list-items i)))
+				    (if (>= (+ i top-data-index) (length data))
+					;; if there are more list items than data items, hide them
+					(setf (slot-value li :style :display) "none")
+					;; otherwise display the data element
+					(let ((datum (elt data (+ i top-data-index)))
+					      (selected? (=== (+ i top-data-index) selected-data-index)))
+					  ;; increase the # displayed count
+					  (incf num-list-items-displayed)
+					  ;; set the class to selected if this is the selected datum
+					  (setf (slot-value li :class-name) (if selected? "selected" ""))
+					  ;; make sure the element is displayed
+					  (setf (slot-value li :style :display) "block")
+					  ;; set the innerHTML of the list element.
+					  (setf (slot-value li :inner-h-t-m-l)
+						(elt datum 0))))))))
+	 (select-updown
+	  (lambda (desired-delta)
+	    (let* ((selected-li (elt list-items selected-li-index))
+		   (li-selection-delta (- (clamp-to-range (+ selected-li-index desired-delta)
+							    0
+							    (- num-list-items-displayed 1))
+					  selected-li-index))
+
+		   (data-selection-delta (- (clamp-to-range (+ selected-data-index desired-delta)
+							    0
+							    (- (length data) 1))
+					    selected-data-index))
+		   ;; shift the list so that either the selection is somewhere in the middle or
+		   ;; 
+		   (li-shift-amount (- data-selection-delta li-selection-delta))
+		    
+		   (newly-selected-li-index (+ selected-li-index li-selection-delta))
+		   (newly-selected-data-index (+ selected-data-index data-selection-delta))
+
+		   (newly-selected-li (elt list-items newly-selected-li-index)))
+      
+	      (when selected-li
+		(setf (slot-value selected-li :class-name) ""))
+	      (when newly-selected-li
+		(setf (slot-value newly-selected-li :class-name) "selected"))
+
+	      (setf selected-li newly-selected-li)
+	      (setf selected-li-index newly-selected-li-index)
+	      (setf selected-data-index newly-selected-data-index)
+	      (setf selected-data (elt data selected-data-index))
+
+	      ;; when the selection bar doesn't move, but we are selecting a new data element
+	      ;; from the list, we need to adjust the top data index
+	      (when (!== 0 li-shift-amount)
+		(incf top-data-index li-shift-amount)
+		(log (+ "LI Shift by " li-shift-amount ".  data index: " selected-data-index ", li index: " selected-li-index))
+		(update-list-display))
+	      
+	      (when selected-data
+		(let ((input-val (elt selected-data 0)))
+		  (setf (slot-value elem :value) input-val)
+		  (setf last-update-input-value input-val)
+		  (selected-item-callback (elt selected-data 1)))))))
+	 
+	 (hidden? (lambda ()
+		    (return (!== "block" (slot-value ac-list 'view 'dom :root :style :display)))))
+	 (ac-hide (lambda ()
+		    (setf (slot-value ac-list 'view 'dom :root :style :display) "none")))
+	 (ac-show (lambda ()
+		    (when (!== "block" (slot-value ac-list 'view 'dom :root :style :display))
+		      (position-ac-list elem ac-list)
+		      (setf (slot-value ac-list 'view 'dom :root :style :display) "block"))))
+			    
+	 (enter-selection (lambda ()
+			    (ac-hide)
+			    (let ((input-val (elt selected-data 0)))
+			      (setf (slot-value elem :value) input-val)
+			      (setf last-update-input-value input-val))
+			   (entered-item-callback (elt selected-data 1)))))
+			   
+    (manifest-sail ac-list
+		   (lambda (html)
+		     (elem-insert (slot-value js-global:document :body) html :top)))
+	      
+    (setf list-items (to-array (slot-value ac-list 'view 'dom :items :child-nodes)))
+    
+    (setf (slot-value elem :onblur) ac-hide)
+
+    (setf (slot-value elem :onchange)
+	  (lambda ()
+	    (log "Element changed.")))
+
+    (let* ((nonalpha-on-keydown (or (== "MSIE" (slot-value *browser-info* :browser))
+				      (== "Safari" (slot-value *browser-info* :browser))))
+	   (nonalpha-fn
+	    (lambda (ev key was-hidden?)
+	      (case key
+		(*down-key*
+		   (select-updown 1)
+		   (paren-events:stop-dom-event ev))
+		(*up-key*
+		   (select-updown -1)
+		   (paren-events:stop-dom-event ev))
+		(*page-down-key*
+		   (select-updown (- (length list-items) 1))
+		   (paren-events:stop-dom-event ev))
+		(*page-up-key*
+		   (select-updown (- (- (length list-items) 1)))
+		   (paren-events:stop-dom-event ev))
+		(*enter-key*
+		   (unless was-hidden?
+		     (enter-selection)
+		     (paren-events:stop-dom-event ev)))
+		(*tab-key*
+		   (unless was-hidden?
+		     (enter-selection)))
+		(*escape-key*
+		   (ac-hide)
+		   (unless was-hidden?
+		     (paren-events:stop-dom-event ev))))))
+
+	   (keydown-fn (lambda (ev)
+			 (when nonalpha-on-keydown
+			   (let ((key (get-key-code ev))
+				 (was-hidden? (hidden?)))
+			     (if was-hidden?
+				 (when (or (=== key *up-key*) (=== key *down-key*)
+					   (=== key *page-up-key*) (=== key *page-down-key*))
+				   (update-data)
+				   (ac-show))
+				 (nonalpha-fn ev key was-hidden?))))))
+	   
+	   (keypress-fn
+	    (lambda (ev)
+	      (let ((key (get-key-code ev))
+		    (was-hidden? (hidden?)))
+					;	      (log (+ "Key code: " key))
+		(when was-hidden?
+		  (update-data)
+		  (ac-show))
+		(when (not nonalpha-on-keydown)
+		  (nonalpha-fn ev key was-hidden?))))))
+      (when keydown-fn
+	(setf (slot-value elem :onkeydown) keydown-fn))
+      (setf (slot-value elem :onkeypress) keypress-fn))
+    
+    #+nil
+    (setf (slot-value elem :onkeyup)
+	  (lambda (ev)
+	    (let ((key (get-key-code ev)))
+;	      (log (+ "Key code: " key))
+	      (if (hidden?)
+		   (let ((val (slot-value elem :value)))
+		     ;; ensure that this is different than the last time we called the callback
+		     (when (!== val last-update-input-value)
+		       (update-data)
+		       (ac-show)))
+		  (update-data)))))
+		
+    (setf (slot-value ac-list 'view 'dom :root :style :display) "none")
+    
+    ))
+
+(defun position-ac-list (elem ac-list)
+  (let ((xy (elem-absolute-position elem)))
+    (set-elem-absolute-position (slot-value ac-list 'view 'dom :root)
+				(elt xy 0)
+				(elt xy 1))))
+
+
+;(defun autocomplete (elem)
+;  (let ((state (create)))
+;    (setf (slot-value elemt :on-key-down)
+;	  (lambda (ev)
+;	    (let ((key 

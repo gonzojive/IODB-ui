@@ -1,0 +1,92 @@
+(in-package :iodb-ui)
+
+(defun detect-browser ()
+  (let ((candidates
+	 (list (list (slot-value js-global::navigator :user-agent)
+		     "MSIE"
+		     "Explorer"
+		     "MSIE")
+	       (list (slot-value js-global::navigator :user-agent)
+		     "Chrome"
+		     "Chrome")
+	       (list (slot-value js-global::navigator :user-agent)
+		     "Firefox"
+		     "Firefox")
+	       (list (slot-value js-global::navigator :user-agent)
+		     "OmniWeb"
+		     "OmniWeb/")
+	       (list (slot-value js-global::navigator :vendor)
+		     "Apple"
+		     "Safari"
+		     "Version")
+	       (list (slot-value js-global::navigator :vendor)
+		     "KDE"
+		     "Konqueror")
+	       (list nil
+		     nil
+		     "Opera"
+		     nil
+		     (slot-value js-global:window :opera))
+	       (list (slot-value js-global::navigator :vendor)
+		     "iCab"
+		     "iCab")
+	       (list (slot-value js-global::navigator :vendor)
+		     "Camino"
+		     "Camino")
+	       (list (slot-value js-global::navigator :user-agent)
+		     "Netscape"
+		     "Netscape")
+	       (list (slot-value js-global::navigator :user-agent)
+		     "Netscape"
+		     "Netscape")
+	       (list (slot-value js-global::navigator :user-agent)
+		     "Mozilla"
+		     "Netscape"
+		     "Mozilla"))))
+    (dolist (candidate candidates)
+      (let* ((data-string (aref candidate 0))
+	     (data-substring (aref candidate 1))
+	     (browser-id (aref candidate 2))
+	     (version-search-string (or (aref candidate 3) browser-id))
+	     (prop (aref candidate 4))
+	     (is-browser? (or (and data-string
+				   (!== -1 (methcall :index-of data-string data-substring)))
+				   prop))
+	     (version (and is-browser? (parse-version data-string version-search-string))))
+	(when is-browser?
+	  (return (create :browser browser-id :version version :os (detect-os))))))
+
+      (return (create :os (detect-os)))))
+
+(defun parse-version (data-string version-search-string)
+  (let ((index (methcall :index-of data-string version-search-string)))
+    (when (=== -1 index)
+	(return nil))
+    (let ((version-str
+	   (methcall :substring data-string (+ index 1 (length version-search-string)))))
+      (when version-str
+	(return (js-global::parse-float version-str))))))
+
+(defun detect-os ()
+  (let ((candidates (list (list (slot-value js-global::navigator :platform)
+				"Win"
+				"Windows")
+			  (list (slot-value js-global::navigator :platform)
+				"Mac"
+				"Mac")
+			  (list (slot-value js-global::navigator :platform)
+				"iPhone"
+				"iPhone/iPod")
+			  (list (slot-value js-global::navigator :user-agent)
+				"Linux"
+				"Linux"))))
+    (dolist (candidate candidates)
+      (let* ((data-string (aref candidate 0))
+	     (search-string (aref candidate 1))
+	     (os-id (aref candidate 2))
+	     (is-os? (and data-string (!== -1 (methcall :index-of data-string search-string)))))
+	(when is-os?
+	  (return os-id))))))
+
+(defvar *browser-info* (detect-browser))
+
