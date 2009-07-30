@@ -36,8 +36,8 @@
   (let* ((sz (calculate-page-size))
 	 (height (elt sz 1)))
     (setf (slot-value sail 'view 'dom 'root 'js-global::style 'js-global::height)
-	  height)
-    (log (+ "Adjusted height to " height))))
+	  height)))
+
 
 (defun center-elem (elem)
   nil)
@@ -78,7 +78,6 @@
 				     str
 				     :top)))
 	 (ms (make-instance modal-sail)))
-    (log "Manifest then modal background!")
     (manifest-sail bg html-writer)
     (manifest-sail ms html-writer)
 

@@ -8,7 +8,12 @@
 	   #:dismiss-modal-sail
 	   #:snazzy-form
 	   #:snazzy-form-sail
+	   #:snazzy-form-sail-view
 	   #:snazzy-form-field-sail
+	   #:input-sail
+	   #:textarea-input-sail
+	   #:input-value
+	   #:snazzy-form-field-input
 	   )
   (:shadowing-import-from :parenscript #:attribute))
 

@@ -77,7 +77,7 @@
     ((or (ancestor :.snazzy-form :p)
 	 (ancestor :.snazzy-form :h1)
 	 (ancestor :.snazzy-form :form)
-	 (ancestor :.snazzy-form :input))
+	 (ancestor :.snazzy-form :.form-field :input))
      :border 0 :margin 0 :padding 0)
 
     (:.spacer :clear "both")
@@ -94,18 +94,38 @@
      :font-size "80%" :color "#666666"  :margin-bottom "2em" :padding-bottom "1em"
      :border-bottom "solid 1px #b7ddf2")
     
+    ((ancestor :.snazzy-form :.form-field)
+     :overflow "auto"
+     :margin "0 0 .7em 0")
+
     ((ancestor :.snazzy-form :label)
-     :display "inline" :font-weight "bold" :text-align "right" :width "10em" :float "left" :clear "left")
+     :font-weight "bold" :text-align "right" :width "10em"
+     :float "left"
+     :display "inline") ; potential ie6 fix  inline is automatically converted to block by all browsers
 
     ((ancestor :.snazzy-form :label :.note)
      :display "block" :font-weight "normal" :font-size "80%" :text-align "right" :color "#666666")
 
     ((ancestor :.snazzy-form :.input)
-     :float "left" :margin "2px 0 10px 10px" :clear "right" :display "inline")
+     :margin "2px 0 0 10.5em" :display "block" :padding "0 0 .2em 0")
 
-    ((ancestor :.snazzy-form :input)
-     :border "solid 1px #aacfe4" :width "18em")
+    ((ancestor :.snazzy-form  :.form-field :input)
+     :border "solid 1px #aacfe4")
+
+    ((ancestor :.snazzy-form :.form-field :input)
+     :width "18em" :padding ".15em")
     
-    ((ancestor :.snazzy-form :input.submit)
-     :margin-left "10em" :background "#666666" :text-align "center" :line-height "2em"
-     :color "#FFFFFF" :font-size "80%" :font-weight "bold")))
+    ((ancestor :.snazzy-form :.button-holder)
+     :margin-left "10.65em")
+
+    #+nil
+    ((ancestor :.snazzy-form :.button-holder :input)
+     :background "#666666" :text-align "center" :line-height "2em"
+     :color "#FFFFFF"  :font-weight "bold" :padding ".25em 1.5em .25em 1.5em"
+     :margin-right "1em")
+    
+    ((ancestor :.snazzy-form :.button-holder :input.cancel)
+     :background "#AA2222" :text-align "center" :line-height "2em"
+     :color "#FFFFFF"  :font-weight "bold" :padding ".25em 1.5em .25em 1.5em"
+     :margin-right "1em")))
+    
