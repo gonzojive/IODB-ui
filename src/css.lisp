@@ -48,5 +48,64 @@
      :border-bottom "none")
 
     ((ancestor :ul.tabs :a\:hover)
-     :background "white"))) ;/* set desired hover color */
+     :background "white")
+    
+    ;; modal view
+    (:.modal-background :position "absolute"
+			:top 0
+			:background-color "#000000"
+			:width "100%"
+			:z-index "99998"
+			:height "550px"
+			:filter "alpha(opacity=75)"
+			:-moz-opacity "0.75"
+			:-khtml-opacity "0.75"
+			:opacity "0.75"
+			)
+    
+    (:.modal :width "800px"
+	     ;:height "500px"
+	     :position "absolute"
+	     :top "50px"
+	     :left "50%"
+	     :margin-left "-400px"
+	     :z-index "99999"
+	     ;:background-color "#ffffff"
+	     )
+    
+    ;; snazzy form
+    ((or (ancestor :.snazzy-form :p)
+	 (ancestor :.snazzy-form :h1)
+	 (ancestor :.snazzy-form :form)
+	 (ancestor :.snazzy-form :input))
+     :border 0 :margin 0 :padding 0)
 
+    (:.spacer :clear "both")
+
+    (:.snazzy-form :min-height "1")
+    ((ancestor :.snazzy-form :form) :min-height "0" :width "100%")
+    ((ancestor :.snazzy-form :.floatholder) :min-height "0" :overflow "auto")
+
+    (:.snazzy-form :padding "14px" :border "solid 2px #b7ddf2" :background-color "#ebf4fb")
+
+    ((ancestor :.snazzy-form :h1) :font-weight "bold" :margin-bottom ".3em")
+
+    ((ancestor :.snazzy-form :p)
+     :font-size "80%" :color "#666666"  :margin-bottom "2em" :padding-bottom "1em"
+     :border-bottom "solid 1px #b7ddf2")
+    
+    ((ancestor :.snazzy-form :label)
+     :display "inline" :font-weight "bold" :text-align "right" :width "10em" :float "left" :clear "left")
+
+    ((ancestor :.snazzy-form :label :.note)
+     :display "block" :font-weight "normal" :font-size "80%" :text-align "right" :color "#666666")
+
+    ((ancestor :.snazzy-form :.input)
+     :float "left" :margin "2px 0 10px 10px" :clear "right" :display "inline")
+
+    ((ancestor :.snazzy-form :input)
+     :border "solid 1px #aacfe4" :width "18em")
+    
+    ((ancestor :.snazzy-form :input.submit)
+     :margin-left "10em" :background "#666666" :text-align "center" :line-height "2em"
+     :color "#FFFFFF" :font-size "80%" :font-weight "bold")))

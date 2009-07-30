@@ -3,7 +3,13 @@
   (:export #:output-css
 	   #:tab-container-sail
 	   #:tab-header-sail
-	   #:*browser-info*)
+	   #:*browser-info*
+	   #:present-modal-sail
+	   #:dismiss-modal-sail
+	   #:snazzy-form
+	   #:snazzy-form-sail
+	   #:snazzy-form-field-sail
+	   )
   (:shadowing-import-from :parenscript #:attribute))
 
 (in-package :iodb-ui)

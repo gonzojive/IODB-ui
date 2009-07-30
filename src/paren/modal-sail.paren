@@ -1,0 +1,88 @@
+(in-package :iodb-ui)
+
+(defvar *modal-background* nil)
+(defvar *modal-sail* nil)
+    
+(defsail modal-background-sail ()
+  ()
+  (:documentation "A generic, custom alert box.")
+  (:html
+   #L(cl-who:with-html-output-to-string (stream)
+       (:div :field "root"
+	     :class "modal-background"
+	     " "))))
+
+(defsail modal-sail ()
+  ()
+  (:documentation "A generic, custom alert box.")
+  (:html
+   #L(cl-who:with-html-output-to-string (stream)
+       (:div :field "root"
+	     :class "modal"
+	     ""))))
+
+(defmethod present-modal-sail ((sail standard-sail))
+  (add-subsail *modal-sail* sail :group "root")
+  (show-sail *modal-sail*)
+  (show-sail *modal-background*))
+
+
+(defmethod dismiss-modal-sail ((sail standard-sail))
+  (remove-from-supersail sail)
+  (hide-sail *modal-sail*)
+  (hide-sail *modal-background*))
+
+(defmethod adjust-sail-size ((sail modal-background-sail))
+  (let* ((sz (calculate-page-size))
+	 (height (elt sz 1)))
+    (setf (slot-value sail 'view 'dom 'root 'js-global::style 'js-global::height)
+	  height)
+    (log (+ "Adjusted height to " height))))
+
+(defun center-elem (elem)
+  nil)
+
+(defmethod adjust-sail-size ((sail modal-sail))
+  (let* ((scroll (calculate-page-scroll)))
+
+    (setf (slot-value sail 'view 'dom 'root 'js-global::style 'js-global::top)
+	  (+ (elt scroll 1) 40))))
+
+
+(defmethod post-render ((sail modal-background-sail))
+  (adjust-sail-size sail)
+  (register-dom-event-handler (toplevel-window) "resize" (lambda () (adjust-sail-size sail)))
+  (hide-sail sail)
+  (return (call-next-method)))
+
+(defmethod show-sail ((sail modal-sail))
+  (call-next-method)
+  (adjust-sail-size sail))
+
+(defmethod show-sail ((sail modal-background-sail))
+  (call-next-method)
+  (adjust-sail-size sail))
+
+(defmethod post-render ((sail modal-sail))
+  (adjust-sail-size sail)
+  (register-dom-event-handler (toplevel-window) "resize" (lambda () (adjust-sail-size sail)))
+  (hide-sail sail)
+  (return (call-next-method)))
+
+
+(defun init-modal-sails ()
+  (let* ((w (toplevel-window))
+	 (bg (make-instance modal-background-sail))
+	 (html-writer (lambda (str)
+			(elem-insert (slot-value w 'js-global::document 'js-global::body)
+				     str
+				     :top)))
+	 (ms (make-instance modal-sail)))
+    (log "Manifest then modal background!")
+    (manifest-sail bg html-writer)
+    (manifest-sail ms html-writer)
+
+    (setf *modal-background* bg)
+    (setf *modal-sail* ms)))
+
+(register-dom-event-handler js-global::window "load" init-modal-sails)

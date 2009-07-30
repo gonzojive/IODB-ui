@@ -1,0 +1,85 @@
+(in-package :iodb-ui)
+
+(defsail snazzy-form-sail ()
+  ((title :initarg :title :accessor snazzy-form-title)
+   (subtitle :initarg :subtitle :accessor snazzy-form-subtitle)
+   (submit-text :initarg :submit-text :accessor snazzy-form-submit-text)
+   (form-fields :initarg :form-fields :accessor snazzy-form-fields))
+  (:documentation "A good-looking form.")
+  (:html
+   #L(cl-who:with-html-output-to-string (stream)
+       (:div :field "root"
+	     :class "snazzy-form"
+	     (:form
+	      :field (ps:symbol-to-js-string :form)
+	      ;; title
+	      (:h1 :field (ps:symbol-to-js-string :title)
+		   " ")
+	      ;; description
+	      (:p :field (ps:symbol-to-js-string :subtitle)
+		  " ")
+	      (:div :class "floatholder"
+		    :field (ps:symbol-to-js-string :children)
+		    " ")
+	      (:div
+	       (:input :class "submit" :type "submit"
+				       :field (ps:symbol-to-js-string :submit-button)))
+	       (:div :class "spacer" " "))))))
+
+(defsail input-sail ()
+  ()
+  (:html
+   #L(cl-who:with-html-output-to-string (stream)
+       (:input
+	:type "text"))))
+
+(defsail snazzy-form-field-sail ()
+  ((title :initarg :title :accessor snazzy-form-field-title)
+   (note :initarg :note :accessor snazzy-form-field-note)
+   (input-type :initarg :input-type :initform :text :accessor snazzy-form-field-input-type)
+   (input :initarg :input  :accessor snazzy-form-field-input
+	  :initform (make-instance input-sail)))
+  (:documentation "A good-looking form field.")
+  (:html
+   #L(cl-who:with-html-output-to-string (stream)
+       (:div
+	:class "form-field"
+	(:label
+	 :field (ps:symbol-to-js-string :label)
+	 (:span
+	  :field (ps:symbol-to-js-string :title)
+	  " ")
+	 (:span :class "note"
+		:field (ps:symbol-to-js-string :note)
+		" "))
+	(:div :class "input"
+	      :field (ps:symbol-to-js-string :input-area)
+	 
+	 " ")))))
+
+(defmethod set-snazzy-form-field-input ((sail snazzy-form-field-sail) (type js-global::-string))
+  (let ((subsail nil))
+    (cond
+      ((=== :text type) (setf subsail (make-instance input-sail))))
+    (add-subsail sail subsail :position :after :group :label)
+    (setf (snazzy-form-field-input-type sail) subsail)))
+
+(defmethod snazzy-form-form ((sail snazzy-form-sail))
+  (return (slot-value sail 'view 'dom :form)))
+
+(defmethod post-render ((sail snazzy-form-sail))
+  (setf (slot-value sail 'view 'dom :submit-button 'js-global::value)
+	(or (snazzy-form-submit-text sail) "submit"))
+  (let ((fields (snazzy-form-fields sail)))
+    (when fields
+      (dolist (field fields)
+	(add-subsail sail field))))
+
+  (return (call-next-method)))
+
+(defmethod post-render ((sail snazzy-form-field-sail))
+  (log (snazzy-form-field-input sail))
+
+  (add-subsail sail (snazzy-form-field-input sail)
+	       :group :input-area))
+

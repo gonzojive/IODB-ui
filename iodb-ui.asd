@@ -19,6 +19,8 @@
 			  ((:parenscript-file "tabs")
 			   (:parenscript-file "browserdetect")
 			   (:parenscript-file "autocomplete" :depends-on ("browserdetect"))
+			   (:parenscript-file "modal-sail" :depends-on ("browserdetect"))
+			   (:parenscript-file "snazzy-form" :depends-on ("browserdetect"))
 			   ))
 			 
 			 )))
