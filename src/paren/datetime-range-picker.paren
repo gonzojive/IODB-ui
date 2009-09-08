@@ -1,0 +1,37 @@
+(in-package :iodb-ui)
+
+;;; Date/time range input
+(defsail datetime-range-picker-sail ()
+  ()
+  (:html
+   #L(cl-who:with-html-output-to-string (stream)
+       (:div :field (ps:symbol-to-js-string :container)
+	     (:input :field (ps:symbol-to-js-string :from-date-input)
+		     :type "text")
+	     "  "
+	     (:input :field (ps:symbol-to-js-string :from-time-input)
+		     :type "text")
+	     "  "
+	     (:input :field (ps:symbol-to-js-string :to-date-input)
+		     :type "text")
+	     "  "
+	     (:input :field (ps:symbol-to-js-string :to-time-input)
+		     :type "text")
+	     "  "
+	     (:input :field (ps:symbol-to-js-string :all-day-checkbox)
+		     :type "checkbox")))))
+
+(defmethod fill-in-content ((sail datetime-range-picker-sail))
+  (setf (slot-value sail 'view 'dom :message :inner-h-t-m-l)
+	(message-text twt))
+
+  (setf (slot-value sail 'view 'dom :author :inner-h-t-m-l)
+	(escape-html (user-name twt)))
+  
+  (setf (slot-value sail 'view 'dom :author :href)
+	(+ "http://twitter.com/" (encode-u-r-i (user-name twt)))))
+  
+(defmethod post-render ((sail datetime-range-picker-sail))
+  (fill-in-content sail))
+
+;(in-package :iodb-www)

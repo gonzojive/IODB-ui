@@ -1,0 +1,93 @@
+(in-package :iodb-ui)
+
+(defsail calendar-sail ()
+  ()
+  (:html
+   #L(cl-who:with-html-output-to-string (stream)
+       (:div
+ :class "cal"
+ (:div
+  :class "calheader"
+  (:div
+   :class "title"
+   (:div :class "prev" 
+         (:a :href "#" "&#x00AB;"))
+   (:div :class "next" 
+         (:a :href "#" "&#x00BB;"))
+   "September 2009")
+  (:ol
+   :class "headrow"
+   (:li :class "weekend" "Su")
+   (:li "M")
+   (:li "T")
+   (:li  "W")
+   (:li  "Th")
+   (:li  "F")
+   (:li :class "weekend" "S")))
+  (:ol
+   :class "calrow"
+   (:li :class "weekend" "30")
+   (:li "31")
+   (:li "1")
+   (:li  "2")
+   (:li  "3")
+   (:li  "4")
+   (:li :class "weekend" "5"))
+
+  (:ol
+   :class "calrow"
+   (:li :class "weekend" "30")
+   (:li "5")
+   (:li "6")
+   (:li  "7")
+   (:li  "8")
+   (:li  "9")
+   (:li :class "weekend" "10"))
+
+  (:ol
+   :class "calrow"
+   (:li :class "weekend" "11")
+   (:li "12")
+   (:li "13")
+   (:li  "14")
+   (:li :class "selected" "15")
+   (:li  "16")
+   (:li :class "weekend" "17"))
+
+  (:ol
+   :class "calrow"
+   (:li :class "weekend" "18")
+   (:li "19")
+   (:li "20")
+   (:li  "21")
+   (:li  "22")
+   (:li  "23")
+   (:li :class "weekend" "24"))
+
+  (:ol
+   :class "calrow"
+   (:li :class "weekend" "25")
+   (:li "26")
+   (:li "27")
+   (:li  "28")
+   (:li  "29")
+   (:li  "30")
+   (:li :class "weekend" "31"))
+
+  (:ol
+   :class "calrow"
+   (:li :class "weekend" "1")
+   (:li "2")
+   (:li "3")
+   (:li  "4")
+   (:li  "5")
+   (:li  "6")
+   (:li :class "weekend" "7"))
+ 
+   
+  )
+       )))
+
+
+       
+;; css

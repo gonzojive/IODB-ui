@@ -118,14 +118,56 @@
     ((ancestor :.snazzy-form :.button-holder)
      :margin-left "10.65em")
 
+    ((ancestor :.snazzy-form :.button-holder :input)
+     :margin-right "1.0em")
+
     #+nil
     ((ancestor :.snazzy-form :.button-holder :input)
      :background "#666666" :text-align "center" :line-height "2em"
      :color "#FFFFFF"  :font-weight "bold" :padding ".25em 1.5em .25em 1.5em"
      :margin-right "1em")
     
+    #+nil
     ((ancestor :.snazzy-form :.button-holder :input.cancel)
      :background "#AA2222" :text-align "center" :line-height "2em"
      :color "#FFFFFF"  :font-weight "bold" :padding ".25em 1.5em .25em 1.5em"
-     :margin-right "1em")))
+     :margin-right "1em")
+
+    ;; Calendar
+    (:.cal :margin "10px" :background-color "#C3D9FF" :width "15.41em" :font-size "85%" :border "1px solid #C3D9FF")
+ 
+    ((ancestor :.cal :.calheader) :text-align "center" :padding "0" )
+    
+    ((ancestor :.cal :.calheader :.title) :overflow "auto" :padding "3px" :font-weight "bold" :color "#0000EE")
+
+    ((ancestor :.cal :.calheader :.prev)  :float "left" :margin-left ".5em")
+    
+    ((ancestor :.cal :.calheader :.next) :float "right" :margin-right ".5em")
+
+    ((or (ancestor :.cal :ol.calrow) 
+	 (ancestor :.cal :ol.headrow))
+     :list-style-type "none" :margin 0 :padding 0 :overflow "auto" :display "block")
+    
+    ((or (ancestor :.cal :ol.calrow :li) 
+	 (ancestor :.cal :ol.headrow :li))
+     :float "left" :width "1.8em" :padding ".2em .2em":text-align "center")
+    
+    ((or (ancestor :.cal :ol.calrow :li) )
+     :background-color "white")
+    
+    
+    ((or (ancestor :.cal :ol.calrow :li.selected) )
+     :background-color "#C3D9FF")
+    
+    
+    ((or (ancestor :.cal :ol.calrow :li\:hover) )
+     :background-color "#D3DFFF")
+    
+    
+    ((or (ancestor :.cal :ol.calrow :li.weekend) )
+     :background-color "#eeeeee")
+    
+    
+    
+    ))
     
