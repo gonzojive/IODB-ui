@@ -10,8 +10,10 @@
 	   #:snazzy-form-sail
 	   #:snazzy-form-sail-view
 	   #:snazzy-form-field-sail
+	   #:snazzy-form-field
 	   #:input-sail
 	   #:textarea-input-sail
+	   #:checkbox-input-sail
 	   #:input-value
 	   #:snazzy-form-field-input
 	   )

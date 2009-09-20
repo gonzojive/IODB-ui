@@ -42,6 +42,19 @@
        (:input
 	:type "text"))))
 
+(defsail checkbox-input-sail ()
+  ((checked? :initarg checked? :initform nil :accessor input-checked?)
+   (note :initarg :note :initform "" :accessor input-note))
+  (:html
+   #L(cl-who:with-html-output-to-string (stream)
+       (:div :field (ps:symbol-to-js-string :container)
+	     (:input :field (ps:symbol-to-js-string :root) :type "checkbox")
+	     (:span :field (ps:symbol-to-js-string :note) "")))))
+
+(defmethod post-render ((sail checkbox-input-sail))
+  (setf (slot-value (sail-field sail :root) 'js-global::checked)
+	(input-checked? sail)))
+
 (defsail textarea-input-sail ()
   ()
   (:html
@@ -50,10 +63,10 @@
 	:rows "3" :cols "70"))))
 
 (defmethod set-input-sail-name ((sail input-sail) name)
-  (setf (slot-value (sail-field :root) 'js-global::name) name))
+  (setf (slot-value (sail-field sail :root) 'js-global::name) name))
 
 (defmethod input-value ((sail input-sail))
-  (return (slot-value (sail-field :root) 'js-global::value)))
+  (return (slot-value (sail-field sail :root) 'js-global::value)))
 
 (defsail snazzy-form-field-sail ()
   ((title :initarg :title :accessor snazzy-form-field-title)
@@ -86,7 +99,10 @@
   (methcall 'js-global::push (snazzy-form-fields sail) fld)
   (add-subsail sail fld))
 
-
+(defmethod snazzy-form-field ((sail snazzy-form-sail) inp-name)
+  (dolist (field (snazzy-form-fields sail))
+    (when (=== (input-name field) inp-name)
+      (return field))))
 
 (defmethod post-render ((sail snazzy-form-sail))
   (setf (slot-value sail 'view 'dom :submit-button 'js-global::value)

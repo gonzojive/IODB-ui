@@ -113,7 +113,8 @@
      :border "solid 1px #aacfe4")
 
     ((ancestor :.snazzy-form :.form-field :input)
-     :width "18em" :padding ".15em")
+     ;:width "18em"
+     :padding ".15em")
     
     ((ancestor :.snazzy-form :.button-holder)
      :margin-left "10.65em")
