@@ -12,10 +12,16 @@
 	   #:snazzy-form-field-sail
 	   #:snazzy-form-field
 	   #:input-sail
+	   #:abstract-input-sail
 	   #:textarea-input-sail
+
 	   #:checkbox-input-sail
-	   #:input-value
+	   #:add-checkbox
 	   #:snazzy-form-field-input
+
+	   #:form-as-json-object
+	   #:add-to-json-object
+	   #:input-value
 	   )
   (:shadowing-import-from :parenscript #:attribute))
 

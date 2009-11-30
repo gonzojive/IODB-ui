@@ -134,6 +134,11 @@
      :color "#FFFFFF"  :font-weight "bold" :padding ".25em 1.5em .25em 1.5em"
      :margin-right "1em")
 
+
+    ((ancestor :.snazzy-form :.checkbox-item)
+     :padding-right ".7em")
+
+
     ;; Calendar
     (:.cal :margin "10px" :background-color "#C3D9FF" :width "15.41em" :font-size "85%" :border "1px solid #C3D9FF")
  
