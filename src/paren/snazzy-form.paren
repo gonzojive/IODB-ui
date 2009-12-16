@@ -59,8 +59,9 @@
 
 (defmethod snazzy-form-field ((sail snazzy-form-sail) inp-name)
   (dolist (field (snazzy-form-fields sail))
-    (when (=== (input-name field) inp-name)
+    (when (=== (snazzy-form-field-input-name field) inp-name)
       (return field))))
+
 
 ;;;; encoding form to JSON
 (defmethod form-as-json-object ((sail snazzy-form-sail))
@@ -70,6 +71,12 @@
     (return obj)))
 
 (defgeneric add-to-json-object (sail obj))
+(defun json-value (val)
+  (let ((special-serializer (and val (slot-value val 'as-json-value))))
+    (return
+      (if special-serializer
+	  (special-serializer val)
+	  val))))
 
 ;;;; submitting form to server
 
@@ -117,10 +124,11 @@
 ;;;;;  Inputs
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defgeneric input-value (sail))
+(defgeneric set-input-value (sail value))
 
 (defsail abstract-input-sail () ())
 
-(defsail input-sail ()
+(defsail input-sail (abstract-input-sail)
   ((name :initform nil :accessor input-sail-name :initarg :name))
   (:html
    #L(cl-who:with-html-output-to-string (stream)
@@ -130,11 +138,17 @@
 (defmethod input-value ((sail input-sail))
   (return (slot-value (sail-field sail :root) 'js-global::value)))
 
-(defmethod add-to-json-object ((sail abstract-input-sail) obj &key name)
-  (setf (slot-value obj name)	(input-value sail)))
+(defmethod set-input-value (sail value)
+  (setf (slot-value (dom-input sail) 'js-global::value) value))
 
-(defmethod set-input-sail-name ((sail input-sail) name)
-  (setf (slot-value (sail-field sail :root) 'js-global::name) name))
+(defmethod dom-input ((sail input-sail))
+  (Return (sail-field sail :root)))
+
+(defmethod add-to-json-object ((sail abstract-input-sail) obj &key name)
+  (setf (slot-value obj name) (json-value (input-value sail))))
+
+;(defmethod set-input-sail-name ((sail input-sail) name)
+;  (setf (slot-value (sail-field sail :root) 'js-global::name) name))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;  Checkbox input
@@ -167,6 +181,9 @@
 	(:span :field (ps:symbol-to-js-string :label))
 	"  "))))
 
+(defmethod dom-input ((sail checkbox-subsail))
+  (return (sail-field sail :input)))
+
 (defsail checkbox-input-sail (abstract-input-sail)
   ()
   (:html
@@ -188,6 +205,100 @@
 		    (when checked?
 		      (return (checkbox-value cb-subsail)))))
 		(sail-subsails sail :container)))))
+
+(defmethod set-input-value ((sail checkbox-input-sail) value-arr)
+  (dolist (cb (sail-subsails sail :container))
+    (setf (slot-value (dom-input cb) 'js-global::checked)
+	  (and (find (checkbox-value cb) value-arr) t))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;  Multiple radio input
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defsail radio-subsail ()
+  ((label :initarg :label :initform nil :accessor radio-label)
+   (value :initarg :value :initform nil :accessor radio-value))
+  (:html
+   #L(cl-who:with-html-output-to-string (stream)
+       (:span
+	:class "checkbox-item"
+	(:input :field (ps:symbol-to-js-string :input) :type "radio")
+	"  "
+	(:span :field (ps:symbol-to-js-string :label))
+	"  "))))
+
+(defmethod dom-input ((sail radio-subsail))
+  (return (sail-field sail :input)))
+
+(defsail radio-input-sail (abstract-input-sail)
+  ()
+  (:html
+   #L(cl-who:with-html-output-to-string (stream)
+       (:div :field (ps:symbol-to-js-string :container)
+	     "  "))))
+
+(defmethod add-radio ((sail radio-input-sail) value label &key checked?)
+  (let ((cb (make-instance radio-subsail :label label :value value)))
+    (add-subsail sail cb :group :container)
+    (setf (slot-value (sail-field cb :input) 'js-global::name)
+	  (snazzy-form-field-input-name (sail-supersail (sail-supersail cb))))
+    (setf (slot-value (sail-field cb :input) 'js-global::checked)
+	  checked?)))
+
+(defmethod input-value ((sail radio-input-sail))
+  (let ((arr
+	 (remove-if-not
+	  #'identity
+	  (lispy-map (lambda (cb-subsail)
+		       (let* ((input (sail-field cb-subsail :input))
+			      (checked? (when input (slot-value input 'js-global::checked))))
+			 (when checked?
+			   (return (radio-value cb-subsail)))))
+		     (sail-subsails sail :container)))))
+    (when (> (length arr) 0)
+      (return (elt arr 0)))))
+
+(defmethod set-input-value ((sail radio-input-sail) value)
+  (dolist (cb (sail-subsails sail :container))
+    (setf (slot-value (dom-input cb) 'js-global::checked)
+	  (=== value (radio-value cb)))))
+    
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;  Single select input
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+#+nil
+(defsail radio-subsail ()
+  ((label :initarg :label :initform nil :accessor radio-label)
+   (value :initarg :value :initform nil :accessor radio-value))
+  (:html
+   #L(cl-who:with-html-output-to-string (stream)
+       (:span
+	:class "checkbox-item"
+	(:input :field (ps:symbol-to-js-string :input) :type "radio")
+	"  "
+	(:span :field (ps:symbol-to-js-string :label))
+	"  "))))
+
+(defsail select-input-sail (abstract-input-sail)
+  ((input-value-map :initform (create) :accessor input-value-map))
+  (:html
+   #L(cl-who:with-html-output-to-string (stream)
+       (:select :field (ps:symbol-to-js-string :container)
+	     "  "))))
+
+(defmethod dom-input ((sail select-input-sail))
+  (return (sail-field sail :container)))
+
+(defmethod add-option ((sail select-input-sail) value label &key selected? default-selected?)
+  (let* ((select (dom-input sail))
+	 (option-num (length (slot-value select 'js-global::options))))
+    (setf (slot-value (input-value-map sail) option-num)
+	  value)
+    (setf (slot-value select 'js-global::options option-num)
+	  (new (js-global::*Option label option-num default-selected? selected?)))))
+
+(defmethod input-value ((sail select-input-sail))
+  (let ((key (slot-value (dom-input sail) 'js-global::value)))
+    (return (slot-value (input-value-map sail) key))))
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;  Textarea input
