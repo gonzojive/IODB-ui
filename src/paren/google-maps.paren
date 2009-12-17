@@ -1,0 +1,41 @@
+(in-package :google-maps)
+
+(defvar +roadmap+
+  (slot-value google 'maps '-map-type-id '+roadmap+))
+
+
+(defun make-lat-long (lat lng)
+  (return (new (funcall (slot-value gmaps:google 'gmaps:maps 'gmaps:-lat-lng)
+			lat lng))))
+
+(defun make-map (dom-elem options)
+  (return (new (-map dom-elem options))))
+
+(in-package :iodb-ui)
+
+(defsail google-map-sail ()
+  ((gmap :initarg :gmap :accessor google-map-gmap))
+  (:documentation "A google maps.")
+  (:html
+   #L(cl-who:with-html-output-to-string (stream)
+       (:div :field (ps:symbol-to-js-string :root)
+	     :class "google-map"
+	     " "))))
+
+
+(defmethod post-render ((sail google-map-sail))
+  (let* ((options
+	  (create :zoom 8
+		  :center  (make-lat-long 44.797916 -93.278046)
+		  :map-type-id ))
+	 (gmap (make-lat-long (new (js-global::*Map (sail-field sail :root) options))))
+
+    (setf (google-map-gmap sail) gmap)
+    #+nil
+    (methcall 'gmaps:set-center gmap
+	      (make-lat-long 44.797916 -93.278046)
+	      8)))
+	
+  
+  
+

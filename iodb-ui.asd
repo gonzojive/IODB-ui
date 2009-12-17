@@ -14,13 +14,15 @@
 			:components
 			((:file "package")
 			 (:file "css" :depends-on ("package"))
-			 (:module "paren"
+			 (:module
+			  "paren" :depends-on ("package")
 			  :components
 			  ((:parenscript-file "tabs")
 			   (:parenscript-file "browserdetect")
 			   (:parenscript-file "autocomplete" :depends-on ("browserdetect"))
 			   (:parenscript-file "modal-sail" :depends-on ("browserdetect"))
 			   (:parenscript-file "snazzy-form" :depends-on ("browserdetect"))
+			   (:parenscript-file "google-maps" :depends-on ("browserdetect"))
 			   #+nil
 			   (:parenscript-file "calendar-picker" :depends-on ("browserdetect"))
 			   #+nil

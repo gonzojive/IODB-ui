@@ -173,7 +173,10 @@
     ((or (ancestor :.cal :ol.calrow :li.weekend) )
      :background-color "#eeeeee")
     
-    
+    ;; Map
+    (:.google-map
+     :width "400px"
+     :height "400px")
     
     ))
     

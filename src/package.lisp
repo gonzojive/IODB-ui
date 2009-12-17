@@ -1,5 +1,23 @@
+(defpackage :google-maps
+    (:nicknames :gmaps)
+  (:use :parenscript :paren-util)
+  ;; globally namespaced
+  (:export #:google  
+	   #:maps
+	   #:-lat-lng
+	   #:-map
+	   #:set-center
+	   #:-map-type-id
+	   #:+roadmap+
+	   ;; more lispy
+	   #:make-lat-long
+	   #:make-map
+	   ))
+
 (defpackage :iodb-ui
-  (:use :cl :cl-who :css-sexp :parenscript :cl-sails :paren-psos :paren-util)
+  (:use :cl :cl-who :css-sexp :parenscript :cl-sails :paren-psos :paren-util
+	:google-maps)
+
   (:export #:output-css
 	   #:tab-container-sail
 	   #:tab-header-sail
@@ -32,7 +50,14 @@
 	   #:json-value
 	   #:set-input-value
 	   #:dom-input
+
+	   ;; google maps
+	   #:google-map-sail
 	   )
   (:shadowing-import-from :parenscript #:attribute))
+
+
+
+	   
 
 (in-package :iodb-ui)
