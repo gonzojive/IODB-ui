@@ -9,9 +9,7 @@
 (defvar *page-down-key* 34)
 
 (defun get-key-code (event)
-  (return (or (and event (slot-value event :key-code))
-	      (and (slot-value js-global::window :event)
-		   (slot-value js-global::window :event :key-code)))))
+  (return (slot-value event 'js-global::code)))
 
 (defun disable-native-autocomplete (elem)
   (methcall :set-attribute elem "autocomplete" "off"))
@@ -46,15 +44,25 @@
        (:div :field "root"
 	     :class "autocomplete"
 	     (:ul :field "items"
-		  (:li) (:li) (:li) (:li) (:li) (:li) (:li) (:li))))))
+		  (dotimes (i 8)
+		    (htm (:li))))))))
+
 
 
 (defun clamp-to-range (num min max)
+  "Given a number, if it is less than MIN returns MIN and if more than MAX returns MAX."
   (return (cond ((> min num) min)
 		((> num max) max)
 		(t num))))
 
-(defun autocomplete-input (elem data-callback selected-item-callback entered-item-callback)
+(defvar *nonalpha-on-keydown*
+  (not (or (== "Firefox" (slot-value *browser-info* :browser))
+	   (== "Opera" (slot-value *browser-info* :browser))))
+;  (or (== "MSIE" (slot-value *browser-info* :browser))
+;      (== "Safari" (slot-value *browser-info* :browser)))
+  "This is true if the browser generates keydown events for non-characters (like escape).")
+
+(defun autocomplete-input (elem &key data-callback selected-item-callback entered-item-callback input-changed-callback)
   "This function creates an autocompletion field from the given input HTML element and callbacks.
 
 DATA-CALLBACK is a function that accepts 1 argument:
@@ -63,38 +71,59 @@ and returns an array of data items of the form
    (display-string value-string)
 
 SELECTED-ITEM-CALLBACK is called when an item is selected from the autocomplete input.  It is
-called with a single argument, which is the value string for that item.
-"
+called with 2 arguments: (1) is the value string for that item, (2) is T if the element was 
+explicitly selected"
   (disable-native-autocomplete elem)
   (let* ((ac-list (make-instance autocomplete-list))
-	 (selected-data nil)
-	 (selected-data-index -1)
+	 (selected-datum nil)
+	 (selected-datum-index -1)
 	 (selected-li-index -1)
 	 (top-data-index 0)
 	 (list-items nil)
 	 (num-list-items-displayed 0)
-	 (data nil)
-	 (last-update-input-value nil)
+	 (data (array))
+	 (input-value (lambda () (return (slot-value elem :value))))
+	 (last-user-input-value nil)
+	 (last-input-was-human? nil)
+	 (last-set-input-value nil)
+	 (last-data-update-input-value nil)
+	 (set-input-value (lambda (val)
+			    (let ((input-changed? (!= val (input-value))))
+			      (when input-changed?
+				(setf (slot-value elem :value) val)
+				(setf last-set-input-value val)
+				(setf last-input-was-human? nil)
+				(input-changed-callback val)))))
+	 (set-input-value-from-selection (lambda ()
+					   (let ((input-val (elt selected-datum 0)))
+					     (set-input-value input-val))))
+;			    (setf last-update-input-value input-val))
+	 (reset-selection (lambda ()
+			    ;; update the data tracking
+			    (setf selected-datum-index -1)
+			    (setf selected-datum (if data (elt data selected-datum-index) nil))
+			    ;; update the display
+			    (setf top-data-index 0)
+			    (setf selected-li-index -1)
+			    (update-list-display)))
 	 (update-data (lambda ()	
-			(let ((val (slot-value elem :value)))
+			(let ((val (input-value)))
 			  ;; ensure that this is different than the last time we called the callback
-			  (when (!== val last-update-input-value)
+			  (when (and (!== val last-data-update-input-value))
+			    ;;(log (+ "Difference in data value '" val "' / '" last-data-update-input-value "'"))
 			    ;; update the data based on the input value
 			    ;(log (+ "Updating data! value: " val))
-			    (setf last-update-input-value val)
+			    (setf last-data-update-input-value val)
 			    (setf data (data-callback val))
 
 			    (if (> (length data) 0)
 				;; if we actually get any data back
 				(progn
-				  (setf selected-data-index -1)
-				  (setf selected-data (elt data selected-data-index))
-				  ;; update the display
-				  (setf top-data-index 0)
-				  (setf selected-li-index -1)
-				  (update-list-display))
+				  (reset-selection)
+				  (select-updown 1 nil))
 
 				(progn
+				  (update-list-display)
 				  (log "No results!")))))))
 	 (update-list-display (lambda ()
 				(setf num-list-items-displayed 0)
@@ -105,7 +134,7 @@ called with a single argument, which is the value string for that item.
 					(setf (slot-value li :style :display) "none")
 					;; otherwise display the data element
 					(let ((datum (elt data (+ i top-data-index)))
-					      (selected? (=== (+ i top-data-index) selected-data-index)))
+					      (selected? (=== (+ i top-data-index) selected-datum-index)))
 					  ;; increase the # displayed count
 					  (incf num-list-items-displayed)
 					  ;; set the class to selected if this is the selected datum
@@ -115,24 +144,50 @@ called with a single argument, which is the value string for that item.
 					  ;; set the innerHTML of the list element.
 					  (setf (slot-value li :inner-h-t-m-l)
 						(elt datum 0))))))))
+	 (select-nth-li
+	  (lambda (newly-selected-li-index &optional (explicit? t))
+	    (let* ((selected-li (elt list-items selected-li-index))
+		   (newly-selected-datum-index (+ selected-datum-index
+						  (- newly-selected-li-index selected-li-index)))
+
+		   (newly-selected-li (elt list-items newly-selected-li-index)))
+
+	      ;; (log (array "Changing class of " selected-li newly-selected-li))
+	      (when selected-li
+		(setf (slot-value selected-li :class-name) ""))
+	      (when newly-selected-li
+		(setf (slot-value newly-selected-li :class-name) "selected"))
+
+	      (setf selected-li           newly-selected-li
+		    selected-li-index     newly-selected-li-index
+		    selected-datum-index  newly-selected-datum-index
+		    selected-datum        (elt data selected-datum-index))
+
+	      ;; when the selection bar doesn't move, but we are selecting a new data element
+	      ;; from the list, we need to adjust the top data index
+	      (when selected-datum
+		(when explicit?
+		  (set-input-value-from-selection))
+		(selected-item-callback (elt selected-datum 1) explicit?)))))
+	    
 	 (select-updown
-	  (lambda (desired-delta)
+	  (lambda (desired-delta &optional (explicit? t))
 	    (let* ((selected-li (elt list-items selected-li-index))
 		   (li-selection-delta (- (clamp-to-range (+ selected-li-index desired-delta)
 							    0
 							    (- num-list-items-displayed 1))
 					  selected-li-index))
 
-		   (data-selection-delta (- (clamp-to-range (+ selected-data-index desired-delta)
+		   (data-selection-delta (- (clamp-to-range (+ selected-datum-index desired-delta)
 							    0
 							    (- (length data) 1))
-					    selected-data-index))
+					    selected-datum-index))
 		   ;; shift the list so that either the selection is somewhere in the middle or
 		   ;; 
 		   (li-shift-amount (- data-selection-delta li-selection-delta))
 		    
 		   (newly-selected-li-index (+ selected-li-index li-selection-delta))
-		   (newly-selected-data-index (+ selected-data-index data-selection-delta))
+		   (newly-selected-datum-index (+ selected-datum-index data-selection-delta))
 
 		   (newly-selected-li (elt list-items newly-selected-li-index)))
       
@@ -143,25 +198,25 @@ called with a single argument, which is the value string for that item.
 
 	      (setf selected-li newly-selected-li)
 	      (setf selected-li-index newly-selected-li-index)
-	      (setf selected-data-index newly-selected-data-index)
-	      (setf selected-data (elt data selected-data-index))
+	      (setf selected-datum-index newly-selected-datum-index)
+	      (setf selected-datum (elt data selected-datum-index))
 
 	      ;; when the selection bar doesn't move, but we are selecting a new data element
 	      ;; from the list, we need to adjust the top data index
 	      (when (!== 0 li-shift-amount)
 		(incf top-data-index li-shift-amount)
-		(log (+ "LI Shift by " li-shift-amount ".  data index: " selected-data-index ", li index: " selected-li-index))
+		;(log (+ "LI Shift by " li-shift-amount ".  data index: " selected-datum-index ", li index: " selected-li-index))
 		(update-list-display))
 	      
-	      (when selected-data
-		(let ((input-val (elt selected-data 0)))
-		  (setf (slot-value elem :value) input-val)
-		  (setf last-update-input-value input-val)
-		  (selected-item-callback (elt selected-data 1)))))))
+	      (when selected-datum
+		(when explicit?
+		  (set-input-value-from-selection))
+		(selected-item-callback (elt selected-datum 1) explicit?)))))
 	 
 	 (hidden? (lambda ()
 		    (return (!== "block" (slot-value ac-list 'view 'dom :root :style :display)))))
 	 (ac-hide (lambda ()
+		    (reset-selection)
 		    (setf (slot-value ac-list 'view 'dom :root :style :display) "none")))
 	 (ac-show (lambda ()
 		    (when (!== "block" (slot-value ac-list 'view 'dom :root :style :display))
@@ -169,94 +224,126 @@ called with a single argument, which is the value string for that item.
 		      (setf (slot-value ac-list 'view 'dom :root :style :display) "block"))))
 			    
 	 (enter-selection (lambda ()
-			    (ac-hide)
-			    (let ((input-val (elt selected-data 0)))
-			      (setf (slot-value elem :value) input-val)
-			      (setf last-update-input-value input-val))
-			   (entered-item-callback (elt selected-data 1)))))
+			    (let ((callback-arg (elt selected-datum 1)))
+			      (set-input-value-from-selection)
+			      (ac-hide)
+			      (setf last-user-input-value (input-value))
+			      (setf last-input-was-human? t)
+			      (entered-item-callback callback-arg)))))
 			   
     (manifest-sail ac-list
 		   (lambda (html)
 		     (elem-insert (slot-value js-global:document :body) html :top)))
 	      
-    (setf list-items (to-array (slot-value ac-list 'view 'dom :items :child-nodes)))
+    (setf list-items (to-array (slot-value (sail-field ac-list :items) :child-nodes)))
     
-    (setf (slot-value elem :onblur) ac-hide)
-
-    (setf (slot-value elem :onchange)
-	  (lambda ()
-	    (log "Element changed.")))
-
-    (let* ((nonalpha-on-keydown (or (== "MSIE" (slot-value *browser-info* :browser))
-				      (== "Safari" (slot-value *browser-info* :browser))))
-	   (nonalpha-fn
+;    (setf (slot-value elem :onchange)
+;	  (lambda ()
+;	    (log "Element changed.")))
+;
+    (let* ((navkey-press-fn ;; when some sort of non-character key is pressed to navigate the autocomplete box
 	    (lambda (ev key was-hidden?)
-	      (case key
-		(*down-key*
-		   (select-updown 1)
-		   (paren-events:stop-dom-event ev))
-		(*up-key*
-		   (select-updown -1)
-		   (paren-events:stop-dom-event ev))
-		(*page-down-key*
-		   (select-updown (- (length list-items) 1))
-		   (paren-events:stop-dom-event ev))
-		(*page-up-key*
-		   (select-updown (- (- (length list-items) 1)))
-		   (paren-events:stop-dom-event ev))
-		(*enter-key*
-		   (unless was-hidden?
-		     (enter-selection)
-		     (paren-events:stop-dom-event ev)))
-		(*tab-key*
-		   (unless was-hidden?
-		     (enter-selection)))
-		(*escape-key*
-		   (ac-hide)
-		   (unless was-hidden?
-		     (paren-events:stop-dom-event ev))))))
-
-	   (keydown-fn (lambda (ev)
-			 (when nonalpha-on-keydown
-			   (let ((key (get-key-code ev))
-				 (was-hidden? (hidden?)))
-			     (if was-hidden?
-				 (when (or (=== key *up-key*) (=== key *down-key*)
-					   (=== key *page-up-key*) (=== key *page-down-key*))
-				   (update-data)
-				   (ac-show))
-				 (nonalpha-fn ev key was-hidden?))))))
-	   
+	      (when was-hidden?
+		(when (or (=== key *up-key*) (=== key *down-key*)
+			  (=== key *page-up-key*) (=== key *page-down-key*))
+		    (ac-show))
+		(case key
+		  (*page-down-key* (setf key *down-key*))
+		  (*page-up-key* (setf key *up-key*))))
+	      (when (or (not was-hidden?)
+			(and was-hidden?
+			     (or (=== key *up-key*) (=== key *down-key*)
+				 (=== key *page-up-key*) (=== key *page-down-key*))))
+		  (case key
+		    (*down-key*
+		       (select-updown 1)
+		       (paren-events:stop-dom-event ev))
+		    (*up-key*
+		       (select-updown -1)
+		       (paren-events:stop-dom-event ev))
+		    (*page-down-key*
+		       (select-updown (- (length list-items) 1))
+		       (paren-events:stop-dom-event ev))
+		    (*page-up-key*
+		       (select-updown (- (- (length list-items) 1)))
+		       (paren-events:stop-dom-event ev))
+		    (*enter-key*
+		       (when (and (not was-hidden?) selected-datum)
+			 (enter-selection)
+			 (paren-events:stop-dom-event ev)))
+		    (*tab-key*
+		       (when (and (not was-hidden?) selected-datum)
+			 (enter-selection)))
+		    (*escape-key*
+		       (when (not was-hidden?)
+			 (ac-hide)
+			 (set-input-value last-user-input-value)
+			 (paren-events:stop-dom-event ev)))))))
+	   (keydown-fn
+	    (lambda (ev)
+	      (when *nonalpha-on-keydown*
+		;; if we receive non-alpha events in keydown, handle them here.  Else handle them in keypress
+		(let ((key (get-key-code ev))
+		      (was-hidden? (hidden?)))
+		  (navkey-press-fn ev key was-hidden?)))))
 	   (keypress-fn
 	    (lambda (ev)
 	      (let ((key (get-key-code ev))
 		    (was-hidden? (hidden?)))
-					;	      (log (+ "Key code: " key))
-		(when was-hidden?
-		  (update-data)
-		  (ac-show))
-		(when (not nonalpha-on-keydown)
-		  (nonalpha-fn ev key was-hidden?))))))
-      (when keydown-fn
-	(setf (slot-value elem :onkeydown) keydown-fn))
-      (setf (slot-value elem :onkeypress) keypress-fn))
-    
-    #+nil
-    (setf (slot-value elem :onkeyup)
-	  (lambda (ev)
-	    (let ((key (get-key-code ev)))
-;	      (log (+ "Key code: " key))
-	      (if (hidden?)
-		   (let ((val (slot-value elem :value)))
-		     ;; ensure that this is different than the last time we called the callback
-		     (when (!== val last-update-input-value)
-		       (update-data)
-		       (ac-show)))
-		  (update-data)))))
-		
-    (setf (slot-value ac-list 'view 'dom :root :style :display) "none")
-    
-    ))
+		;; (log (+ "Key code: " key))
+		;; (when was-hidden?  (ac-show))
+		(when (not *nonalpha-on-keydown*)
+		  (navkey-press-fn ev key was-hidden?)))))
+	   (keyup-fn
+	    (lambda (ev)
+	      (let* ((val (input-value))
+		     (key (get-key-code ev))
+		     (user-changed-input? (and (!== val last-set-input-value)
+					       (or (!== val last-user-input-value)
+						   (not last-input-was-human?)))))
+						   
+		;; check whether the value has changed from the value set artificially
+		;; if it has, then it was set by a human
+		;;(log (+ "Keyup value: '" val "'"))
+		(when user-changed-input?
+		  ;;(log (+ "User changed data!  Last user input / new: '" last-user-input-value "' / '" val "'")) 
+		  (setf last-user-input-value val)
+		  (setf last-input-was-human? t)
+		  (input-changed-callback val))
+		;; when the user entered a string that is different thatn the last input
+		;; that autoupdates, update the data
+		(when (and user-changed-input?
+			   (!== val last-data-update-input-value))
+		  (update-data))
+		(when (and hidden? user-changed-input?)
+		    ;; ensure that this is different than the last time we called the callback
+		  (ac-show))))))
+
+      (register-dom-event-handler elem "keydown" keydown-fn)
+      (register-dom-event-handler elem "keypress" keypress-fn)
+      (register-dom-event-handler elem "keyup" keyup-fn)
+      (register-dom-event-handler elem "blur" (lambda (ev) (js-global::set-timeout ac-hide 200)))
+      (register-dom-event-handler (sail-field ac-list :items) "mousewheel"
+				  (lambda (ev)
+				    (stop-dom-event ev)
+				    (select-updown (* -1 (slot-value ev 'js-global::wheel)))))
+
+      (dotimes (i (length list-items))
+	(funcall (lambda (n)
+		   (register-dom-event-handler (elt list-items n) "mouseover"
+					       (lambda (ev)
+						 (stop-dom-event ev)
+						 (select-nth-li n false)))
+		   #+nil
+		   (select-nth-li i)
+		   (register-dom-event-handler (elt list-items n) "mouseup"
+					       (lambda (ev)
+						 (stop-dom-event ev)
+						 (select-nth-li n))))
+		 i))
+
+      (setf (slot-value ac-list 'view 'dom :root :style :display) "none"))))
+
 
 (defun position-ac-list (elem ac-list)
   (let ((xy (elem-absolute-position elem)))

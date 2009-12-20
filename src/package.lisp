@@ -1,21 +1,19 @@
 (defpackage :iodb-ui
-  (:use :cl :cl-who :css-sexp :parenscript :cl-sails :paren-psos :paren-util)
+  (:use :cl :cl-who :css-sexp :parenscript :cl-sails :paren-psos :paren-util :paren-events)
   (:export #:output-css
+
+	   ;; tabs
 	   #:tab-container-sail
 	   #:tab-header-sail
+	   #:tab-sail
+	   #:tab-content
+	   #:tab-header
+	   #:add-tab
+	   #:select-tab
+	   #:remove-tab
+	   #:autocomplete-input
 	   #:*browser-info*
-	   #:present-modal-sail
-	   #:dismiss-modal-sail
-	   #:snazzy-form
-	   #:snazzy-form-sail
-	   #:snazzy-form-sail-view
-	   #:snazzy-form-field-sail
-	   #:snazzy-form-field
-	   #:input-sail
-	   #:textarea-input-sail
-	   #:checkbox-input-sail
-	   #:input-value
-	   #:snazzy-form-field-input
+
 	   )
   (:shadowing-import-from :parenscript #:attribute))
 

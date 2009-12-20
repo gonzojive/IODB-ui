@@ -19,13 +19,8 @@
 			  ((:parenscript-file "tabs")
 			   (:parenscript-file "browserdetect")
 			   (:parenscript-file "autocomplete" :depends-on ("browserdetect"))
-			   (:parenscript-file "modal-sail" :depends-on ("browserdetect"))
-			   (:parenscript-file "snazzy-form" :depends-on ("browserdetect"))
-			   #+nil
-			   (:parenscript-file "calendar-picker" :depends-on ("browserdetect"))
-			   #+nil
-			   (:parenscript-file "datetime-range-picker" :depends-on ("calendar-picker" "autocomplete" "browserdetect"))
 			   ))
+			 
 			 )))
 
-  :depends-on ("cl-who" "css-sexp" "cl-sails"))
+  :depends-on ("cl-who" "css-sexp" "cl-sails" "paren-util" "paren-events"))
