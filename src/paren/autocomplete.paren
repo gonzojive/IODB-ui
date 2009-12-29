@@ -82,13 +82,13 @@ explicitly selected"
 	 (list-items nil)
 	 (num-list-items-displayed 0)
 	 (data (array))
-	 (input-value (lambda () (return (slot-value elem :value))))
+	 (ac-input-value (lambda () (return (slot-value elem :value))))
 	 (last-user-input-value nil)
 	 (last-input-was-human? nil)
 	 (last-set-input-value nil)
 	 (last-data-update-input-value nil)
-	 (set-input-value (lambda (val)
-			    (let ((input-changed? (!= val (input-value))))
+	 (set-ac-input-value (lambda (val)
+			    (let ((input-changed? (!= val (ac-input-value))))
 			      (when input-changed?
 				(setf (slot-value elem :value) val)
 				(setf last-set-input-value val)
@@ -96,7 +96,7 @@ explicitly selected"
 				(input-changed-callback val)))))
 	 (set-input-value-from-selection (lambda ()
 					   (let ((input-val (elt selected-datum 0)))
-					     (set-input-value input-val))))
+					     (set-ac-input-value input-val))))
 ;			    (setf last-update-input-value input-val))
 	 (reset-selection (lambda ()
 			    ;; update the data tracking
@@ -107,7 +107,7 @@ explicitly selected"
 			    (setf selected-li-index -1)
 			    (update-list-display)))
 	 (update-data (lambda ()	
-			(let ((val (input-value)))
+			(let ((val (ac-input-value)))
 			  ;; ensure that this is different than the last time we called the callback
 			  (when (and (!== val last-data-update-input-value))
 			    ;;(log (+ "Difference in data value '" val "' / '" last-data-update-input-value "'"))
@@ -227,7 +227,7 @@ explicitly selected"
 			    (let ((callback-arg (elt selected-datum 1)))
 			      (set-input-value-from-selection)
 			      (ac-hide)
-			      (setf last-user-input-value (input-value))
+			      (setf last-user-input-value (ac-input-value))
 			      (setf last-input-was-human? t)
 			      (entered-item-callback callback-arg)))))
 			   
@@ -277,7 +277,7 @@ explicitly selected"
 		    (*escape-key*
 		       (when (not was-hidden?)
 			 (ac-hide)
-			 (set-input-value last-user-input-value)
+			 (set-ac-input-value last-user-input-value)
 			 (paren-events:stop-dom-event ev)))))))
 	   (keydown-fn
 	    (lambda (ev)
@@ -296,7 +296,7 @@ explicitly selected"
 		  (navkey-press-fn ev key was-hidden?)))))
 	   (keyup-fn
 	    (lambda (ev)
-	      (let* ((val (input-value))
+	      (let* ((val (ac-input-value))
 		     (key (get-key-code ev))
 		     (user-changed-input? (and (!== val last-set-input-value)
 					       (or (!== val last-user-input-value)
