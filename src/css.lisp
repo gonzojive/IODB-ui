@@ -98,12 +98,15 @@
      :overflow "auto"
      :margin "0 0 .7em 0")
 
-    ((ancestor :.snazzy-form :label)
+    ((ancestor :.snazzy-form :.field-set :h3)
+     :border-bottom "1px dotted gray" :margin "0.5em 0em" :padding "0.5em 0.3em")
+    
+    ((ancestor :.snazzy-form :label.snazzy)
      :font-weight "bold" :text-align "right" :width "10em"
      :float "left"
      :display "inline") ; potential ie6 fix  inline is automatically converted to block by all browsers
 
-    ((ancestor :.snazzy-form :label :.note)
+    ((ancestor :.snazzy-form :label.snazzy :.note)
      :display "block" :font-weight "normal" :font-size "80%" :text-align "right" :color "#666666")
 
     ((ancestor :.snazzy-form :.input)
@@ -121,18 +124,6 @@
 
     ((ancestor :.snazzy-form :.button-holder :input)
      :margin-right "1.0em")
-
-    #+nil
-    ((ancestor :.snazzy-form :.button-holder :input)
-     :background "#666666" :text-align "center" :line-height "2em"
-     :color "#FFFFFF"  :font-weight "bold" :padding ".25em 1.5em .25em 1.5em"
-     :margin-right "1em")
-    
-    #+nil
-    ((ancestor :.snazzy-form :.button-holder :input.cancel)
-     :background "#AA2222" :text-align "center" :line-height "2em"
-     :color "#FFFFFF"  :font-weight "bold" :padding ".25em 1.5em .25em 1.5em"
-     :margin-right "1em")
 
 
     ((ancestor :.snazzy-form :.checkbox-item)

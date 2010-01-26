@@ -1,6 +1,6 @@
 (defpackage :google-maps
     (:nicknames :gmaps)
-  (:use :parenscript :paren-util)
+  (:use :parenscript :paren-util :cl)
   ;; globally namespaced
   (:export #:google  
 	   #:maps
@@ -8,10 +8,16 @@
 	   #:-map
 	   #:set-center
 	   #:-map-type-id
+	   #:map-type-id
 	   #:+roadmap+
 	   ;; more lispy
+	   #:make-info-window
 	   #:make-lat-long
+	   #:make-lat-long-bounds
 	   #:make-map
+	   #:make-map
+	   #:make-marker
+	   #:ajax-geocode
 	   ))
 
 (defpackage :iodb-ui
@@ -24,6 +30,8 @@
 	   #:*browser-info*
 	   #:present-modal-sail
 	   #:dismiss-modal-sail
+
+	   ;; snazzy forms
 	   #:snazzy-form
 	   #:snazzy-form-sail
 	   #:snazzy-form-sail-view
@@ -33,6 +41,8 @@
 	   #:input-sail
 	   #:abstract-input-sail
 	   #:textarea-input-sail
+	   #:add-form-component
+	   #:snazzy-form-component
 
 	   #:select-input-sail
 	   #:add-option
@@ -53,6 +63,7 @@
 
 	   ;; google maps
 	   #:google-map-sail
+	   #:google-map
 	   )
   (:shadowing-import-from :parenscript #:attribute))
 

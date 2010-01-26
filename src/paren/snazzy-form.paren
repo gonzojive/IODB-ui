@@ -8,7 +8,8 @@
    (subtitle :initarg :subtitle :accessor snazzy-form-subtitle)
    (submit-text :initarg :submit-text :accessor snazzy-form-submit-text)
    (cancel-text :initarg :cancel-text :accessor snazzy-form-cancel-text)
-   (form-fields :initarg :form-fields :initform (array) :accessor snazzy-form-fields))
+   (form-fields :initarg :form-fields :initform (array) :accessor snazzy-form-fields)
+   (form-components :initarg :form-components :initform (array) :accessor snazzy-form-components))
   (:documentation "A good-looking form.")
   (:html
    #L(cl-who:with-html-output-to-string (stream)
@@ -53,11 +54,24 @@
 (defmethod snazzy-form-form ((sail snazzy-form-sail))
   (return (slot-value sail 'view 'dom :form)))
 
-(defmethod add-form-field ((sail snazzy-form-sail) (fld standard-sail))
+(defmethod add-form-field ((sail snazzy-form-sail) (fld standard-sail) &key (render t))
   (methcall 'js-global::push (snazzy-form-fields sail) fld)
-  (add-subsail sail fld))
+  (when render
+    (add-subsail sail fld)))
 
 (defmethod snazzy-form-field ((sail snazzy-form-sail) inp-name)
+  (dolist (field (snazzy-form-fields sail))
+    (when (=== (snazzy-form-field-input-name field) inp-name)
+      (return field))))
+
+
+(defmethod add-form-component ((sail snazzy-form-sail) comp &key (render t))
+  (methcall 'js-global::push (snazzy-form-components sail) comp)
+  (when render
+    (add-subsail sail comp)))
+
+#+nil
+(defmethod snazzy-form-component ((sail snazzy-form-sail) inp-name)
   (dolist (field (snazzy-form-fields sail))
     (when (=== (snazzy-form-field-input-name field) inp-name)
       (return field))))
@@ -95,6 +109,7 @@
        (:div
 	:class "form-field"
 	(:label
+	 :class "snazzy"
 	 :field (ps:symbol-to-js-string :label)
 	 (:span
 	  :field (ps:symbol-to-js-string :title)
@@ -115,6 +130,27 @@
   (return (call-next-method))
   #+nil(set-input-name (snazzy-form-field-input sail) (snazzy-form-field-input-name sail)))
 
+(defmethod add-to-json-object ((sail snazzy-form-field-sail) obj)
+  ;; serialize the input
+  (add-to-json-object (snazzy-form-field-input sail) obj
+		      :name (snazzy-form-field-input-name sail)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;  FieldSets
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defsail snazzy-form-fieldset-sail ()
+  ((title :initarg :title :accessor snazzy-form-fieldset-title))
+  (:documentation "A good-looking form field.")
+  (:html
+   #L(cl-who:with-html-output-to-string (stream)
+       (:div
+	:class "field-set"
+	:field (ps:symbol-to-js-string :root)
+	(:h3
+	 :field (ps:symbol-to-js-string :title)
+	 " ")))))
+
+#+nil
 (defmethod add-to-json-object ((sail snazzy-form-field-sail) obj)
   ;; serialize the input
   (add-to-json-object (snazzy-form-field-input sail) obj

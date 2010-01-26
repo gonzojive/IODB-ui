@@ -8,13 +8,43 @@
   (return (new (funcall (slot-value gmaps:google 'gmaps:maps 'gmaps:-lat-lng)
 			lat lng))))
 
-(defun make-map (dom-elem options)
-  (return (new (-map dom-elem options))))
+(defun make-lat-long-bounds (sw ne)
+  (return (new (funcall (slot-value gmaps:google 'gmaps:maps '-lat-lng-bounds)
+			sw ne))))
+
+(defun make-map (dom-elem &key &key-object options)
+  (log "Making map with elem and options: ")
+  (log (list dom-elem options))
+  (let ((gmap
+	 (new (funcall (slot-value google 'maps '-map)
+			dom-elem options))))
+    (log "New map:")
+    (log gmap)
+    (return gmap)))
+
+(defun make-marker (&key ; map clickable cursor draggable flat icon map position shadow shape title visible z-index
+		    &key-object options)
+  (return (new (funcall (slot-value google 'maps '-marker) options))))
+
+(defun make-info-window (&key &key-object options)
+  (log "Make info window with options: ")
+  (log options)
+  (return (new (funcall (slot-value google 'maps '-info-window) options))))
+
+(defun ajax-geocode(&key callback address bounds language lat-long region)
+  (let ((g (new (slot-value google 'maps '-geocoder))))
+    (methcall 'geocode g
+	      (create "address" address
+		      "bounds" bounds
+		      "language" language
+		      "latLng" lat-long
+		      "region" region)
+	      callback)))
 
 (in-package :iodb-ui)
 
 (defsail google-map-sail ()
-  ((gmap :initarg :gmap :accessor google-map-gmap))
+  ((gmap :initarg :gmap :accessor google-map))
   (:documentation "A google maps.")
   (:html
    #L(cl-who:with-html-output-to-string (stream)
@@ -24,13 +54,12 @@
 
 
 (defmethod post-render ((sail google-map-sail))
-  (let* ((options
-	  (create :zoom 8
-		  :center  (make-lat-long 44.797916 -93.278046)
-		  :map-type-id ))
-	 (gmap (make-lat-long (new (js-global::*Map (sail-field sail :root) options))))
+  (let* ((gmap (make-map (sail-field sail :root)
+			 :zoom 8
+			 :center  (make-lat-long 44.797916 -93.278046)
+			 :map-type-id +roadmap+)))
 
-    (setf (google-map-gmap sail) gmap)
+    (setf (google-map sail) gmap)
     #+nil
     (methcall 'gmaps:set-center gmap
 	      (make-lat-long 44.797916 -93.278046)
