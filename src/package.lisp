@@ -22,16 +22,26 @@
 
 (defpackage :iodb-ui
   (:use :cl :cl-who :css-sexp :parenscript :cl-sails :paren-psos :paren-util
-	:google-maps)
-
+	:paren-events :google-maps)
   (:export #:output-css
+
+	   ;; tabs
 	   #:tab-container-sail
 	   #:tab-header-sail
+	   #:tab-sail
+	   #:tab-content
+	   #:tab-header
+	   #:add-tab
+	   #:select-tab
+	   #:remove-tab
+	   #:autocomplete-input
 	   #:*browser-info*
+
+	   ;; modal sails
 	   #:present-modal-sail
 	   #:dismiss-modal-sail
-
-	   ;; snazzy forms
+	   
+	   ;; snazzy form
 	   #:snazzy-form
 	   #:snazzy-form-sail
 	   #:snazzy-form-sail-view
@@ -43,6 +53,7 @@
 	   #:textarea-input-sail
 	   #:add-form-component
 	   #:snazzy-form-component
+	   #:add-form-field
 
 	   #:select-input-sail
 	   #:add-option

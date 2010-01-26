@@ -28,6 +28,7 @@
 			   #+nil
 			   (:parenscript-file "datetime-range-picker" :depends-on ("calendar-picker" "autocomplete" "browserdetect"))
 			   ))
+			 
 			 )))
 
-  :depends-on ("cl-who" "css-sexp" "cl-sails"))
+  :depends-on ("cl-who" "css-sexp" "cl-sails" "paren-util" "paren-events"))

@@ -1,7 +1,8 @@
 (in-package :iodb-ui)
 
 (defsail tab-container-sail ()
-  ()
+  ((tabs :initform (array) :reader tabs)
+   (selected-tab :initform nil :accessor selected-tab))
   (:documentation "This is a sail that contains the entire tab system, from the tab bar
 to the pane that changes when different tabs are clicked.")
   (:html
@@ -13,7 +14,71 @@ to the pane that changes when different tabs are clicked.")
 	 (:ul :class "tabs" :field (ps:symbol-to-js-string :tabs)))
 	(:div :field (ps:symbol-to-js-string :tab-content))))))
 
-(defsail tab-header-sail ()
+(defsail tab-sail ()
+  ((content :initarg :content :initform nil :accessor tab-content)
+   (header :initarg :header :initform nil :accessor tab-header)))
+
+(defmethod initialize-instance :after ((sail tab-sail) &key container)
+  (setf (sail-supersail sail) container))
+
+(defmethod remove-from-supersail ((sail tab-sail))
+  (remove-tab (sail-supersail sail) sail))
+
+(defmethod remove-tab ((container tab-container-sail) (tab tab-sail))
+  (remove-from-array (tabs container) tab)
+  (remove-from-supersail (tab-content tab))
+  (remove-from-supersail (tab-header tab))
+  (unselect-tab container tab)
+  (dolist (some-tab (reverse (tabs container)))
+    (when (not (eql some-tab tab))
+;      (log "Attempting to select the tab")
+;      (log some-tab)
+      (select-tab container some-tab)
+      (return))))
+
+(defmethod unselect-tab ((container tab-container-sail) (tab tab-sail))
+  (when (eql tab (selected-tab container))
+    (let ((header (tab-header tab))
+	  (content (tab-content tab)))
+      (when header
+	(setf (slot-value (sail-field header :root) 'js-global::class-name)
+	      ""))
+      (when content
+	(hide-sail content))
+      (setf (selected-tab container) nil))))
+
+(defmethod select-tab ((container tab-container-sail) (tab tab-sail))
+  (when (not (eql tab (selected-tab container)))
+    (let* ((old-tab (selected-tab container))
+	   (header (tab-header tab))
+	   (content (tab-content tab)))
+      (when old-tab
+	(unselect-tab container old-tab))
+      ;; change the appearance of the tabs
+      (setf (selected-tab container) tab)
+      (when header
+	(setf (slot-value (sail-field header :root) 'js-global::class-name)
+	      "selected"))
+      ;; show the content
+      (when content
+	(show-sail content)))))
+
+
+(defmethod add-tab ((container tab-container-sail) &key title content (selected? t))
+  (add-subsail container content :group :tab-content)
+  (hide-sail content)
+  (let* ((header (make-instance tab-header-sail :title title))
+	 (tab (make-instance tab-sail :content content :header header :container container)))
+    (push-on-end tab (tabs container))
+    (add-subsail container header :group :tabs)
+    (register-event-handler header tab-selected-event
+			    (lambda (ev)
+			      (select-tab container tab)))
+    (when selected?
+      (select-tab container tab))
+    (return tab)))
+
+(defsail tab-header-sail (standard-sail event-emitter)
   ((tab-title :initarg :title :initform ""))
   (:documentation "This is the sail that contains an individual tab heading in the tab system")
   (:html
@@ -26,17 +91,17 @@ to the pane that changes when different tabs are clicked.")
   ((tab-header :initarg :tab-header :accessor event-tab-header))
   (:documentation "Event fires when a tab is selected"))
 
-(defmethod event-fired ((sail tab-header-sail) (ev tab-selected-event))
-  (log "Tab selected!!!!")
-  (setf (slot-value sail 'view 'dom :content-editable) t))
+;(defmethod event-fired ((sail tab-header-sail) (ev tab-selected-event))
+;  (call-next-method))
 
 (defmethod post-render ((sail tab-header-sail))
-  (log "Post render tab header")
+;  (log "Post render tab header")
   (call-next-method)
-  (log sail)
-  (log (slot-value sail 'view 'dom :root))
-  (register-dom-event-handler (slot-value sail 'view 'dom :root)
-			      "click"
-			      (lambda (ev)
-				(make-instance tab-selected-event :origin sail :tab-header sail))))
+;  (log sail)
+;  (log (slot-value sail 'view 'dom :root))
+  (register-sail-event-handlers
+   (sail)
+   (:root "click" (ev)
+	  (stop-dom-event ev)
+	  (make-instance tab-selected-event :origin sail :tab-header sail))))
   

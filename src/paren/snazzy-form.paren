@@ -132,8 +132,9 @@
 
 (defmethod add-to-json-object ((sail snazzy-form-field-sail) obj)
   ;; serialize the input
-  (add-to-json-object (snazzy-form-field-input sail) obj
-		      :name (snazzy-form-field-input-name sail)))
+  (let ((name (snazzy-form-field-input-name sail)))
+    (when name
+      (add-to-json-object (snazzy-form-field-input sail) obj  :name name))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;  FieldSets
