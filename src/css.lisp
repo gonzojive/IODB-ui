@@ -132,6 +132,8 @@
     ((ancestor :.snazzy-form :.checkbox-item)
      :padding-right ".7em")
 
+    ((ancestor :.snazzy-form :.compound :button)
+     :margin "0 0 1px 0")
 
     ;; Calendar
     (:.cal :margin "10px" :background-color "#C3D9FF" :width "15.41em" :font-size "85%" :border "1px solid #C3D9FF")

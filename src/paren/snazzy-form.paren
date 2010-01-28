@@ -349,3 +349,44 @@
 
 (defmethod input-value ((sail textarea-input-sail))
   (return (slot-value (sail-field sail :root) 'js-global::value)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; An input that consistes of multiple, ordered inputs beneath it.
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defsail compound-input-sail (abstract-input-sail)
+  ()
+  (:html
+   #L(cl-who:with-html-output-to-string (stream)
+       (:div :class "compound"
+	     (:div
+	      :field (ps:symbol-to-js-string :inputs)
+	      " ")
+	     (:button :field (ps:symbol-to-js-string :add-button)
+		      "Add")))))
+
+(defmethod input-value ((sail compound-input-sail))
+  (return (lispy-map input-value (sail-subsails sail :inputs))))
+
+(defmethod set-input-value ((sail compound-input-sail) arr)
+  (lispy-map set-input-value (sail-subsails sail :inputs) arr))
+
+(defmethod post-render ((sail compound-input-sail))
+  (register-sail-event-handlers 
+   (sail)
+   (:add-button "click" (ev)
+		(stop-dom-event ev)
+		(log "Adding event to compound input sail.")
+		(make-instance add-input-event :sail sail :origin sail))))
+
+(defclass remove-input-event (sail-inspired-event)
+  ((input :initarg :input :initform nil :accessor event-input))
+  (:documentation "Fired by an input sail when the user has
+indicated that she would like to remove the input."))
+
+(defclass add-input-event (sail-inspired-event)
+  ()
+  (:documentation "Fired by a compound input sail when the user has
+indicated that she would like to add another input to the compound
+input."))
+   
+

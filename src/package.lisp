@@ -50,6 +50,9 @@
 	   #:snazzy-form-field-input
 	   #:input-sail
 	   #:abstract-input-sail
+	   #:compound-input-sail
+	   #:remove-input-event
+	   #:add-input-event
 	   #:textarea-input-sail
 	   #:add-form-component
 	   #:snazzy-form-component
