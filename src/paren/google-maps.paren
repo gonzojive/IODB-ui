@@ -8,7 +8,7 @@
   (return (new (funcall (slot-value gmaps:google 'gmaps:maps 'gmaps:-lat-lng)
 			lat lng))))
 
-(defun make-lat-long-bounds (sw ne)
+(defun make-lat-long-bounds (&optional sw ne)
   (return (new (funcall (slot-value gmaps:google 'gmaps:maps '-lat-lng-bounds)
 			sw ne))))
 
@@ -64,7 +64,3 @@
     (methcall 'gmaps:set-center gmap
 	      (make-lat-long 44.797916 -93.278046)
 	      8)))
-	
-  
-  
-

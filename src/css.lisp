@@ -66,18 +66,18 @@
 			:opacity "0.75"
 			)
     
-    (:.modal :width "800px"
+    (:.modal :width "1000px"
 	     ;:height "500px"
 	     :position "absolute"
 	     :top "50px"
 	     :left "50%"
-	     :margin-left "-400px"
+	     :margin-left "-500px"
 	     :z-index "99999"
 	     ;:background-color "#ffffff"
 	     )
     
     ;; snazzy form
-    ((or (ancestor :.snazzy-form :p)
+    ((or (ancestor :.snazzy-form :p.subtitle)
 	 (ancestor :.snazzy-form :h1)
 	 (ancestor :.snazzy-form :form)
 	 (ancestor :.snazzy-form :.form-field :input))
@@ -93,7 +93,7 @@
 
     ((ancestor :.snazzy-form :h1) :font-weight "bold" :margin-bottom ".3em")
 
-    ((ancestor :.snazzy-form :p)
+    ((ancestor :.snazzy-form :p.subtitle)
      :font-size "80%" :color "#666666"  :margin-bottom "2em" :padding-bottom "1em"
      :border-bottom "solid 1px #b7ddf2")
     

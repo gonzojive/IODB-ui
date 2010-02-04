@@ -21,7 +21,7 @@
 	      (:h1 :field (ps:symbol-to-js-string :title)
 		   " ")
 	      ;; description
-	      (:p :field (ps:symbol-to-js-string :subtitle)
+	      (:p :field (ps:symbol-to-js-string :subtitle) :class "subtitle"
 		  " ")
 	      (:div :class "floatholder"
 		    :field (ps:symbol-to-js-string :children)
@@ -170,6 +170,7 @@
   (:html
    #L(cl-who:with-html-output-to-string (stream)
        (:input
+	:field (ps:symbol-to-js-string :root)
 	:type "text"))))
 
 (defmethod input-value ((sail input-sail))
@@ -336,6 +337,14 @@
 (defmethod input-value ((sail select-input-sail))
   (let ((key (slot-value (dom-input sail) 'js-global::value)))
     (return (slot-value (input-value-map sail) key))))
+
+(defmethod set-input-value ((sail select-input-sail) v)
+  (let ((options (slot-value (dom-input sail) 'js-global::options)))
+    (dotimes (i (length options))
+      (let ((val (slot-value (input-value-map sail) i)))
+	(when (=== val v)
+	  (setf (slot-value (elt options i) 'js-global::selected) t)
+	  (return))))))
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;  Textarea input
@@ -388,5 +397,5 @@ indicated that she would like to remove the input."))
   (:documentation "Fired by a compound input sail when the user has
 indicated that she would like to add another input to the compound
 input."))
-   
 
+   
