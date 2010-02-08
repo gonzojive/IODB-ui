@@ -345,6 +345,15 @@
 	(when (=== val v)
 	  (setf (slot-value (elt options i) 'js-global::selected) t)
 	  (return))))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Autocomplete input
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defsail autocomplete-input-sail (input-sail)
+  ()
+  (:view-superclasses input-sail-view))
+
+
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;  Textarea input

@@ -72,7 +72,15 @@ and returns an array of data items of the form
 
 SELECTED-ITEM-CALLBACK is called when an item is selected from the autocomplete input.  It is
 called with 2 arguments: (1) is the value string for that item, (2) is T if the element was 
-explicitly selected"
+explicitly selected
+
+INPUT-CHANGED-CALLBACK 
+
+ENTERED-ITEM-CALLBACK is called when the user presses enter and some
+item is selected.  It is called with arguments of the following form:
+   (value display-string)
+
+"
   (disable-native-autocomplete elem)
   (let* ((ac-list (make-instance autocomplete-list))
 	 (selected-datum nil)
@@ -224,12 +232,13 @@ explicitly selected"
 		      (setf (slot-value ac-list 'view 'dom :root :style :display) "block"))))
 			    
 	 (enter-selection (lambda ()
-			    (let ((callback-arg (elt selected-datum 1)))
+			    (let ((callback-arg (elt selected-datum 1))
+				  (callback-arg2 (elt selected-datum 0)))
 			      (set-input-value-from-selection)
 			      (ac-hide)
 			      (setf last-user-input-value (ac-input-value))
 			      (setf last-input-was-human? t)
-			      (entered-item-callback callback-arg)))))
+			      (entered-item-callback callback-arg callback-arg2)))))
 			   
     (manifest-sail ac-list
 		   (lambda (html)
