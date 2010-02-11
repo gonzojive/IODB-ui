@@ -348,7 +348,8 @@ item is selected.  It is called with arguments of the following form:
 		   (register-dom-event-handler (elt list-items n) "mouseup"
 					       (lambda (ev)
 						 (stop-dom-event ev)
-						 (select-nth-li n))))
+						 (select-nth-li n)
+						 (enter-selection))))
 		 i))
 
       (setf (slot-value ac-list 'view 'dom :root :style :display) "none"))))
