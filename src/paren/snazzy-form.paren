@@ -380,6 +380,7 @@
 	      :field (ps:symbol-to-js-string :inputs)
 	      " ")
 	     (:button :field (ps:symbol-to-js-string :add-button)
+		      :type "button"
 		      "Add")))))
 
 (defmethod input-value ((sail compound-input-sail))

@@ -58,10 +58,9 @@
 			:top 0
 			:background-color "#000000"
 			:width "100%"
-			:z-index "99998"
+;			:z-index "99998"
 			:height "550px"
 			:filter "alpha(opacity=75)"
-			:-moz-opacity "0.75"
 			:-khtml-opacity "0.75"
 			:opacity "0.75"
 			)
@@ -72,7 +71,11 @@
 	     :top "50px"
 	     :left "50%"
 	     :margin-left "-500px"
-	     :z-index "99999"
+;	     :z-index "99999"
+	     :filter "alpha(opacity=100)"
+	     :-khtml-opacity "1.00"
+	     :opacity "1.00"
+	     :margin-bottom "2em"
 	     ;:background-color "#ffffff"
 	     )
     
