@@ -1,7 +1,8 @@
 (in-package :google-maps)
 
 (defvar +roadmap+
-  (slot-value google 'maps '-map-type-id '+roadmap+))
+  (when (slot-value js-global::window 'google)
+    (slot-value google 'maps '-map-type-id '+roadmap+)))
 
 
 (defun make-lat-long (lat lng)

@@ -407,4 +407,28 @@ indicated that she would like to remove the input."))
 indicated that she would like to add another input to the compound
 input."))
 
-   
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Multicomplete Input: for inputting discrete elements from
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defsail multicomplete-list-item ()
+  ((value :initform nil :accessor list-item-value :initarg :value))
+  (:html
+   #L(cl-who:with-html-output-to-string (stream)
+       (:li :class "multicomplete-li"
+            (:span :field (ps:symbol-to-js-string :text)
+                   "text")
+            (:a :href "#" :class "closebutton"
+                "x")))))
+
+(defsail multicomplete-input-sail (abstract-input-sail)
+  ()
+  (:css "body {color: #ff0000; } ")
+  (:html
+   #L(cl-who:with-html-output-to-string (stream)
+       (:ul :class "multicomplete"
+            :field (ps:symbol-to-js-string :list)
+            " "))))
+
+
+
