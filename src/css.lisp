@@ -3,6 +3,9 @@
 (defparameter *tab-border-color* "#fda966")
 
 (defun output-css (stream)
+  "Outputs CSS that is common to the interface elements in the
+package.  At the moment this is a bit scrapy considering that cl-sails
+has good way of doing CSS already."
   (css-sexp:with-css-output (stream) 
     ;;; autocomplete
     (:div.autocomplete :padding "0" :margin "1px")
@@ -65,13 +68,13 @@
 			:opacity "0.75"
 			)
     
-    (:.modal :width "1000px"
-	     ;:height "500px"
+    (:.modal ;:height "500px"
 	     :position "absolute"
 	     :top "50px"
-	     :left "50%"
-	     :margin-left "-500px"
+	     ;:left "50%"
+	     ;:margin-left "-500px"
 ;	     :z-index "99999"
+             :width "100%"
 	     :filter "alpha(opacity=100)"
 	     :-khtml-opacity "1.00"
 	     :opacity "1.00"

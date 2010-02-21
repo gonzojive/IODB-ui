@@ -3,7 +3,7 @@
 (defvar *modal-zindex* 1)
 
 (defsail modal-sail ()
-  ()
+  ((container-class :initform "modal" :initarg :container-class :accessor container-class))
   (:documentation "A generic, custom alert box.")
   (:html
    #L(cl-who:with-html-output-to-string (stream)
@@ -15,15 +15,16 @@
 	:field "container"
 	" "))))
 
-(defmethod present-modal-sail ((sail standard-sail))
+(defmethod present-modal-sail ((sail standard-sail) &key (container-class "modal"))
   (let* ((w (toplevel-window))
-	 (modal (make-instance modal-sail))
+	 (modal (make-instance modal-sail :container-class container-class))
 	 (html-writer (lambda (str)
 			(elem-insert (slot-value w 'js-global::document 'js-global::body)
 				     str
 				     :top))))
     (manifest-sail modal html-writer)
-    (add-subsail modal sail :group "container")))
+    (add-subsail modal sail :group "container")
+    (return modal)))
 
 
 (defmethod dismiss-modal-sail ((sail standard-sail))
@@ -31,7 +32,8 @@
     (remove-from-supersail sail))
   (when sup
     (pslog "Removing %o 's dom nodes" sup)
-    (remove-dom-nodes sup)))
+    (remove-dom-nodes sup)
+    ))
 
 (defmethod adjust-sail-size ((sail modal-sail))
   ;; adjust content
@@ -55,6 +57,7 @@
 (defmethod post-render ((sail modal-sail))
   (setf (slot-value (sail-field sail :background) 'js-global::style 'js-global::z-index)
 	(incf *modal-zindex*))
+  (setf (slot-value (sail-field sail :container) "className") (container-class sail))
   (setf (slot-value (sail-field sail :container) 'js-global::style 'js-global::z-index)
 	(incf *modal-zindex*))
   (pslog "Rendered bg %o and container %o" (sail-field sail :background) (sail-field sail :container))

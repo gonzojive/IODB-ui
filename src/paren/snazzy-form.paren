@@ -424,7 +424,7 @@ input."))
 
 (defsail multicomplete-input-sail (abstract-input-sail)
   ()
-  (:css "body {color: #ff0000; } ")
+  (:css " ")
   (:html
    #L(cl-who:with-html-output-to-string (stream)
        (:ul :class "multicomplete"

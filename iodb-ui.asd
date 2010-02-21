@@ -9,7 +9,7 @@
   :description ""
   :version "0.0.1"
   :author "Red Daly"
-  :license "No one is licensed to use this, not even myself."
+  :license "LLGPL"
   :components ((:module "src"
 			:components
 			((:file "package")
@@ -32,3 +32,16 @@
 			 )))
 
   :depends-on ("cl-who" "css-sexp" "cl-sails" "paren-util" "paren-events"))
+
+
+(defsystem :iodb-ui.doc
+  :description ""
+  :version "0.0.1"
+  :author "Red Daly <reddaly at gmail.com>"
+  :license "No one is licensed to use this, not even myself."
+  :components ((:module "doc"
+			:components
+			((:file "iodb-ui-docdown")
+			 )))
+
+  :depends-on ("iodb-ui" "docdown" "cl-who"))
