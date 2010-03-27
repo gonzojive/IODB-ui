@@ -101,7 +101,8 @@ item is selected.  It is called with arguments of the following form:
 				(setf (slot-value elem :value) val)
 				(setf last-set-input-value val)
 				(setf last-input-was-human? nil)
-				(input-changed-callback val)))))
+                                (when input-changed-callback
+                                  (input-changed-callback val))))))
 	 (set-input-value-from-selection (lambda ()
 					   (let ((input-val (elt selected-datum 0)))
 					     (set-ac-input-value input-val))))
@@ -176,7 +177,8 @@ item is selected.  It is called with arguments of the following form:
 	      (when selected-datum
 		(when explicit?
 		  (set-input-value-from-selection))
-		(selected-item-callback (elt selected-datum 1) explicit?)))))
+                (when selected-item-callback
+                  (selected-item-callback (elt selected-datum 1) explicit?))))))
 	    
 	 (select-updown
 	  (lambda (desired-delta &optional (explicit? t))
@@ -219,7 +221,8 @@ item is selected.  It is called with arguments of the following form:
 	      (when selected-datum
 		(when explicit?
 		  (set-input-value-from-selection))
-		(selected-item-callback (elt selected-datum 1) explicit?)))))
+                (when selected-item-callback
+                  (selected-item-callback (elt selected-datum 1) explicit?))))))
 	 
 	 (hidden? (lambda ()
 		    (return (!== "block" (slot-value ac-list 'view 'dom :root :style :display)))))
@@ -238,7 +241,8 @@ item is selected.  It is called with arguments of the following form:
 			      (ac-hide)
 			      (setf last-user-input-value (ac-input-value))
 			      (setf last-input-was-human? t)
-			      (entered-item-callback callback-arg callback-arg2)))))
+                              (when entered-item-callback
+                                (entered-item-callback callback-arg callback-arg2))))))
 			   
     (manifest-sail ac-list
 		   (lambda (html)
@@ -318,7 +322,8 @@ item is selected.  It is called with arguments of the following form:
 		  ;;(log (+ "User changed data!  Last user input / new: '" last-user-input-value "' / '" val "'")) 
 		  (setf last-user-input-value val)
 		  (setf last-input-was-human? t)
-		  (input-changed-callback val))
+                  (when input-changed-callback
+                    (input-changed-callback val)))
 		;; when the user entered a string that is different thatn the last input
 		;; that autoupdates, update the data
 		(when (and user-changed-input?

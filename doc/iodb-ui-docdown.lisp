@@ -24,6 +24,12 @@
   ((form :initarg :form :accessor verbatim-form)
    (literal :initarg :literal :accessor verbatim-literal)))
 
+(defmethod make-load-form ((self verbatim-form) &optional environment)
+   (declare (ignore environment))
+   `(make-instance 'verbatim-form
+                   :form ,(verbatim-form self)
+                   :literal ,(verbatim-literal self)))
+
 (defmethod print-object ((node verbatim-form) s)
            (format s "#W~A" (verbatim-literal node)))
 
@@ -68,7 +74,9 @@ result and the literal value read."
   (assert (listp (verbatim-form (docnode-verbatim-form node))))
   (cl-who:with-html-output-to-string (s)
     (let* ((literal-string (verbatim-literal (docnode-verbatim-form node)))
-           (lines (split-lines (subseq literal-string  1 (1- (length literal-string))))))
+           (lines (split-lines (subseq literal-string  1 (1- (length literal-string)))))
+           (javascript (when (docnode-js-eval? node)
+                         (apply 'parenscript:ps* (verbatim-form (docnode-verbatim-form node))))))
       (when (equal "" (first lines))
         (setf lines (cdr lines)))
       (let ((num-common-leading-spaces
@@ -77,7 +85,11 @@ result and the literal value read."
                                           (length line)))
                                   lines))))
         (htm
-         (:pre (:code (esc (let ((refined-literal
+         (:pre
+          #+nil
+          (:code :class "paren-translation"
+                 (esc javascript))
+          (:code (esc (let ((refined-literal
                                   (format nil "~{~A~^~%~}"
                                           (mapcar #'(lambda (line) (subseq line num-common-leading-spaces))
                                                   lines))))
@@ -87,10 +99,7 @@ result and the literal value read."
       (when (docnode-js-eval? node)
         (htm
          (:script :type "text/javascript"
-                  (fmt "//<![CDATA[~%")
-                  (str
-                   (apply 'parenscript:ps* (verbatim-form (docnode-verbatim-form node))))
-                  (str "//]]>")))))))
+                  (fmt "//<![CDATA[~%~A//]]>" javascript)))))))
 
 (progn
   (defdoc index :page
@@ -110,6 +119,8 @@ result and the literal value read."
                   (iodb-ui:output-css  s)
                   ;(esc colorize:*coloring-css*)
                   (css-sexp:with-css-output (s)
+                    (:pre :overflow "auto")
+                    (:code.paren-translation :float "right" :width "40%" :background-color "#eee" :border "1px solid #aaa")
                     (:h2 :border-bottom "1px dashed #bbb"))))))
      "
 ## Synopsis
@@ -145,6 +156,36 @@ You can also browse the code at [http://github.com/gonzojive/iodb-ui](http://git
        for use in javascript.  Here are some examples of basic usage (and demos!).")
 
        (:children
+        (defdoc autocomplete-example1 :standard
+          (:title "Autocomplete example")
+          (:content
+;           "Hello, world!  here's some html..."
+           "An autocomplete input box looks like this:"
+
+           (defdoc button-for-modal-view-example1 :html
+             (:html "<form><input id='autocomplete1' type='text' /></form>"))
+
+           (defdoc modal-view-example1-code-part1 :parenscript
+             (:js-eval? t)
+             (:code
+              #W(
+                 (autocomplete-input (elem-by-id "autocomplete1")
+                                     :entered-item-callback (lambda (value display-string)
+                                                              (js-global::alert (+ "Entered " value)))
+                                     :data-callback (lambda (input-value)
+                                                      (let ((options (list (list "1" "One")
+                                                                           (list "2" "Two")
+                                                                           (list "3" "Three")
+                                                                           (list "4" "Four")
+                                                                           (list "5" "Five")
+                                                                           (list "6" "Six"))))
+                                                        (return (methcall "filter"
+                                                                          options
+                                                                          (lambda (option)
+                                                                            (return (!== -1 (methcall "indexOf" (elt option 0) input-value))))))))))))
+           ))
+
+
 	(defdoc modal-view-example1 :standard
           (:title "Modal view example")
           (:content
@@ -154,41 +195,37 @@ common example of this is the <code>alert()</code> function in
 Javascript.  iodb-ui provides a different facility that darkens the
 entire page and displays a custom sail.
 
-First we define an alert view class:"
+First we define a custom sail:"
 
-           (defdoc modal-view-example1-code :parenscript
-;             (:code #Wdoggy-dog)
+           (defdoc modal-view-example1-code-part1 :parenscript
              (:js-eval? t)
              (:code
               #W(
                  (defsail little-alert ()
                    ()
                    (:css ".mydiv { width: 10em; margin: auto; height: 5em; background-color: white; padding:1em; }")
-                   (:html "<div class='mydiv' > This will close in 2 seconds. </div>"))
-                 
+                   (:html "<div class='mydiv' > This will close in 2 seconds. </div>")))))
+
+           "Next we show a function that presents a new instance of this sail as a modal view to the user:"
+
+           (defdoc modal-view-example1-code-part2 :parenscript
+             (:js-eval? t)
+             (:code
+              #W(
                  (defun display-little-alert ()
                    (let ((sail (make-instance little-alert)))
                      (present-modal-sail sail)
                      (js-global::set-timeout (lambda () (dismiss-modal-sail sail))
-                                             2000))))))))))
+                                             2000))))))
 
-           #+nil
-           (defdoc modal-view-example1 :html
-             (:html
-              (with-html-output-to-string (s)
-                (:script :type "text/javascript"
-                         (fmt "//<![CDATA[~%")
-                         (str
-                          (ps:ps
-                            (defsail little-alert ()
-                              ()
-                              (:css ".mydiv { width: 10em; margin: auto; height: 5em; background-color: white; padding:1em; }")
-                              (:html "<div class='mydiv' > This will close in 2 seconds. </div>"))
-                            (let ((sail (make-instance little-alert)))
-                              (present-modal-sail sail)
-                              (js-global::set-timeout (lambda () (dismiss-modal-sail sail))
-                                                      2000))))
-                         (str "//]]>")))))
+           (defdoc button-for-modal-view-example1 :html
+             (:html "<button onclick='displayLittleAlert()' type='button'>Click to see a modal view alert</button>"))
+
+           
+
+           ))))
+
+
      (defdoc functions :section
        (:title "Functions")
        (:content "")

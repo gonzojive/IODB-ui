@@ -1,7 +1,11 @@
 (in-package :google-maps)
 
+(defun gmaps? ()
+  (return (and (slot-value js-global::window 'google)
+               (slot-value js-global::window 'google 'maps))))
+
 (defvar +roadmap+
-  (when (slot-value js-global::window 'google)
+  (when (gmaps?)
     (slot-value google 'maps '-map-type-id '+roadmap+)))
 
 
