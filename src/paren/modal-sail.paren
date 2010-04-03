@@ -37,14 +37,16 @@
 
 (defmethod adjust-sail-size ((sail modal-sail))
   ;; adjust content
-  (let* ((scroll (calculate-page-scroll)))
+  (let* ((scroll (calculate-page-scroll))
+         (vertical-offset (+ (elt scroll 1) 40)))
     (setf (slot-value (sail-field sail :container) 'js-global::style 'js-global::top)
-	  (+ (elt scroll 1) 40)))
+	  (+ "" vertical-offset "px")))
   ;; adjust background
   (let* ((sz (calculate-page-size))
 	 (height (elt sz 1)))
+    (log (+ "Adjusting modal sail to height " height))
     (setf (slot-value (sail-field sail :background) 'js-global::style 'js-global::height)
-	  height)))
+	  (+ "" height "px"))))
 
 (defmethod add-subsail ((sail modal-sail) subsail &key &allow-other-keys)
   (call-next-method)
@@ -63,7 +65,8 @@
   (pslog "Rendered bg %o and container %o" (sail-field sail :background) (sail-field sail :container))
 
   (adjust-sail-size sail)
-  (register-dom-event-handler (toplevel-window) "resize" (lambda () (adjust-sail-size sail)))
+  (register-dom-event-handler (toplevel-window) "resize"
+                              (lambda () (adjust-sail-size sail)))
   ;(hide-sail sail)
   (return (call-next-method)))
 

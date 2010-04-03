@@ -1,6 +1,7 @@
 (in-package :iodb-ui)
 
 (defparameter *tab-border-color* "#fda966")
+(defparameter *tab-vertical-padding* 4)
 
 (defun output-css (stream)
   "Outputs CSS that is common to the interface elements in the
@@ -14,7 +15,8 @@ has good way of doing CSS already."
      :background-color "#ffffff"
      :border "1px solid #666666"
      :padding "0"
-     :margin "0")
+     :margin "0"
+     :cursor "pointer")
 
     ((ancestor :.autocomplete :li) :list-style-type "none" :display "block" :padding ".2em")
 
@@ -27,10 +29,13 @@ has good way of doing CSS already."
      :font-weight "bold"
      :border-bottom (raw (format nil "1px solid ~A" *tab-border-color*)) ;#ffc89c" ;set border COLOR as desired
      :list-style-type "none"
-     :padding "3px .4em 3px .5em") ; THIRD number must change with respect to padding-top (X) below
+     :overflow "auto"
+     :width "100%"
+     :padding (raw (format nil "~Apx .4em 3px .5em" (+ 1 *tab-vertical-padding*)))) ; THIRD number must change with respect to padding-top (X) below
 
     ((ancestor :ul.tabs :li)
      :display "inline")
+;     :margin "3px 0 -3px 0")
 
     ((ancestor :ul.tabs :li.selected)
      :border-bottom "1px solid #fff" ; set border color to page background color
@@ -42,10 +47,10 @@ has good way of doing CSS already."
      :color "#000" ; set selected tab link color as desired
 ;     :position "relative"
 ;     :top "1px"
-     :padding-top "4px") ;must change with respect to padding (X) above and below
+     :padding-top (raw (format nil "~Apx" *tab-vertical-padding*))) ;must change with respect to padding (X) above and below
 
     ((ancestor :ul.tabs :li :a)
-     :padding "3px .7em" ; set padding (tab size) as desired; FIRST number must change with respect to padding-top (X) above
+     :padding (raw (format nil "~Apx .7em" (+ 0 *tab-vertical-padding*))) ; set padding (tab size) as desired; FIRST number must change with respect to padding-top (X) above
      :border (raw (format nil "1px solid ~A" *tab-border-color*))   ; set border COLOR as desired; usually matches border color specified in #tabnav
      :background-color "#ffe8d7" ; set unselected tab background color as desired
      :color "#666" ; set unselected tab link color as desired

@@ -11,7 +11,10 @@ to the pane that changes when different tabs are clicked.")
 	:class "tab-sail"
 	(:div
 	 :class "tab-header"
-	 (:ul :class "tabs" :field (ps:symbol-to-js-string :tabs)))
+	 (:ul :class "tabs" :field (ps:symbol-to-js-string :tabs)
+              (:li :style "display: block; clear: both;"
+                   :field (ps:symbol-to-js-string :clear-tab))))
+
 	(:div :field (ps:symbol-to-js-string :tab-content))))))
 
 (defsail tab-sail ()
@@ -64,13 +67,19 @@ to the pane that changes when different tabs are clicked.")
 	(show-sail content)))))
 
 
-(defmethod add-tab ((container tab-container-sail) &key title content (selected? t))
+(defmethod add-tab ((container tab-container-sail) &key title content (selected? t) align)
   (add-subsail container content :group :tab-content)
   (hide-sail content)
   (let* ((header (make-instance tab-header-sail :title title))
 	 (tab (make-instance tab-sail :content content :header header :container container)))
     (push-on-end tab (tabs container))
-    (add-subsail container header :group :tabs)
+    (add-subsail container header :group :tabs) ; :position "before")
+    (when (and align (=== "right" align))
+      (let ((elem (sail-field header :root)))
+        (methcall "setAttribute" elem
+                  "style" (+ (methcall "getAttribute" elem "style")
+                             "; float: right;"))))
+
     (register-event-handler header tab-selected-event
 			    (lambda (ev)
 			      (select-tab container tab)))
@@ -83,7 +92,8 @@ to the pane that changes when different tabs are clicked.")
   (:documentation "This is the sail that contains an individual tab heading in the tab system")
   (:html
    #L(cl-who:with-html-output-to-string (stream)
-       (:li (:a :field (ps:symbol-to-js-string :title)
+       (:li :field (ps:symbol-to-js-string :root)
+            (:a :field (ps:symbol-to-js-string :title)
 		:href "#"
 		"")))))
 

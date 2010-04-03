@@ -31,6 +31,7 @@
                    :literal ,(verbatim-literal self)))
 
 (defmethod print-object ((node verbatim-form) s)
+
            (format s "#W~A" (verbatim-literal node)))
 
 (defun verbatim-reader (s c n)

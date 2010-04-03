@@ -185,6 +185,12 @@
 (defmethod add-to-json-object ((sail abstract-input-sail) obj &key name)
   (setf (slot-value obj name) (json-value (input-value sail))))
 
+(defun snazzy-form-input-value (sail field-name)
+  "Returns the input value of the given field in the given form."
+  (return (input-value
+           (snazzy-form-field-input
+            (iodb-ui:snazzy-form-field sail field-name)))))
+
 ;(defmethod set-input-sail-name ((sail input-sail) name)
 ;  (setf (slot-value (sail-field sail :root) 'js-global::name) name))
 
