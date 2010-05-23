@@ -1,6 +1,7 @@
 (in-package :iodb-ui)
 
 (defparameter *tab-border-color* "#fda966")
+(defparameter *tab-selected-background-color* "#fff")
 (defparameter *tab-vertical-padding* 4)
 
 (defun output-css (stream)
@@ -27,31 +28,40 @@ has good way of doing CSS already."
      :text-align "left" ; set to left, right or center
      :margin ".5em 0 .5em 0" ; set margins as desired
      :font-weight "bold"
-     :border-bottom (raw (format nil "1px solid ~A" *tab-border-color*)) ;#ffc89c" ;set border COLOR as desired
      :list-style-type "none"
-     :overflow "auto"
-     :width "100%"
      :padding (raw (format nil "~Apx .4em 3px .5em" (+ 1 *tab-vertical-padding*)))) ; THIRD number must change with respect to padding-top (X) below
 
+    (:.tab-content
+     :clear "both"
+     :border-top (raw (format nil "1px solid ~A" *tab-border-color*))) ;#ffc89c" ;set border COLOR as desired
+
     ((ancestor :ul.tabs :li)
-     :display "inline")
+     ;; these lines used to be part of :li :a
+     :border (raw (format nil "1px solid ~A" *tab-border-color*))   ; set border COLOR as desired; usually matches border color specified in #tabnav
+     :-moz-border-radius "4px 4px 0 0"
+     :-webkit-border-radius "4px 4px 0 0"
+     :padding (raw (format nil "~Apx .7em 0" (+ 0 *tab-vertical-padding*))) ; set padding (tab size) as desired; FIRST number must change with respect to padding-top (X) above
+     :border-bottom "0"
+     ;; end
+     
+     :margin-right "1em"
+     :display "block"
+     :float "left")
 ;     :margin "3px 0 -3px 0")
 
     ((ancestor :ul.tabs :li.selected)
-     :border-bottom "1px solid #fff" ; set border color to page background color
+     :border-bottom-width "0px" ; set border color to page background color
 ;     :background-color (raw *tab-border-color*)
      );"#fff") ; set background color to match above border color
 
     ((ancestor :ul.tabs :li.selected :a)
-     :background-color (raw *tab-border-color*) ;"#fff" ; set selected tab background color as desired
+     :background-color (raw *tab-selected-background-color*) ;"#fff" ; set selected tab background color as desired
      :color "#000" ; set selected tab link color as desired
-;     :position "relative"
-;     :top "1px"
-     :padding-top (raw (format nil "~Apx" *tab-vertical-padding*))) ;must change with respect to padding (X) above and below
+     :position "relative"
+     :top "1px")
 
     ((ancestor :ul.tabs :li :a)
-     :padding (raw (format nil "~Apx .7em" (+ 0 *tab-vertical-padding*))) ; set padding (tab size) as desired; FIRST number must change with respect to padding-top (X) above
-     :border (raw (format nil "1px solid ~A" *tab-border-color*))   ; set border COLOR as desired; usually matches border color specified in #tabnav
+     :padding "0 .7em"
      :background-color "#ffe8d7" ; set unselected tab background color as desired
      :color "#666" ; set unselected tab link color as desired
      :margin-right "7px" ; set additional spacing between tabs as desired
@@ -61,7 +71,7 @@ has good way of doing CSS already."
     ((ancestor :ul.tabs :a\:hover)
       :background "white")
     
-    ;; modal view
+    ;;;; modal view
     (:.modal-background :position "absolute"
 			:top 0
 			:background-color "#000000"

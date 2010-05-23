@@ -1,5 +1,9 @@
 (in-package :iodb-ui)
 
+;;; a few sources of inspiration:
+;;; http://www.htmldog.com/articles/tabs/ -- great basic implementation
+;;; http://unraveled.com/publications/assets/css_tabs/index4.html -- original inspiration
+
 (defsail tab-container-sail ()
   ((tabs :initform (array) :reader tabs)
    (selected-tab :initform nil :accessor selected-tab))
@@ -12,10 +16,12 @@ to the pane that changes when different tabs are clicked.")
 	(:div
 	 :class "tab-header"
 	 (:ul :class "tabs" :field (ps:symbol-to-js-string :tabs)
+              #+nil
               (:li :style "display: block; clear: both;"
                    :field (ps:symbol-to-js-string :clear-tab))))
 
-	(:div :field (ps:symbol-to-js-string :tab-content))))))
+	(:div :field (ps:symbol-to-js-string :tab-content)
+              :class "tab-content")))))
 
 (defsail tab-sail ()
   ((content :initarg :content :initform nil :accessor tab-content)
