@@ -9,7 +9,7 @@ package.  At the moment this is a bit scrapy considering that cl-sails
 has good way of doing CSS already."
   (css-sexp:with-css-output (stream) 
     ;;; autocomplete
-    (:div.autocomplete :padding "0" :margin "1px")
+    (:div.autocomplete :padding "0" :margin "1px" :z-index "200")
       
     ((ancestor :.autocomplete :ul)
      :background-color "#ffffff"
@@ -30,7 +30,7 @@ has good way of doing CSS already."
      :border-bottom (raw (format nil "1px solid ~A" *tab-border-color*)) ;#ffc89c" ;set border COLOR as desired
      :list-style-type "none"
      :overflow "auto"
-     :width "100%"
+     :width "99%"
      :padding (raw (format nil "~Apx .4em 3px .5em" (+ 1 *tab-vertical-padding*)))) ; THIRD number must change with respect to padding-top (X) below
 
     ((ancestor :ul.tabs :li)
@@ -96,7 +96,7 @@ has good way of doing CSS already."
 
     (:.spacer :clear "both")
 
-    (:.snazzy-form :min-height "1")
+    (:.snazzy-form :min-height "1px")
     ((ancestor :.snazzy-form :form) :min-height "0" :width "100%")
     ((ancestor :.snazzy-form :.floatholder) :min-height "0" :overflow "auto")
 

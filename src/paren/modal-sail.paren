@@ -29,11 +29,11 @@
 
 (defmethod dismiss-modal-sail ((sail standard-sail))
   (let ((sup (sail-supersail sail)))
-    (remove-from-supersail sail))
-  (when sup
-    (pslog "Removing %o 's dom nodes" sup)
-    (remove-dom-nodes sup)
-    ))
+    (when sup
+      (remove-from-supersail sail)
+      (pslog "Removing %o 's dom nodes" sup)
+      (remove-dom-nodes sup))))
+
 
 (defmethod adjust-sail-size ((sail modal-sail))
   ;; adjust content
