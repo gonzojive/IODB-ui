@@ -10,7 +10,7 @@ package.  At the moment this is a bit scrapy considering that cl-sails
 has good way of doing CSS already."
   (css-sexp:with-css-output (stream) 
     ;;; autocomplete
-    (:div.autocomplete :padding "0" :margin "1px")
+    (:div.autocomplete :padding "0" :margin "1px" :z-index "200")
       
     ((ancestor :.autocomplete :ul)
      :background-color "#ffffff"
@@ -108,7 +108,7 @@ has good way of doing CSS already."
 
     (:.spacer :clear "both")
 
-    (:.snazzy-form :min-height "1")
+    (:.snazzy-form :min-height "1px")
     ((ancestor :.snazzy-form :form) :min-height "0" :width "100%")
     ((ancestor :.snazzy-form :.floatholder) :min-height "0" :overflow "auto")
 
