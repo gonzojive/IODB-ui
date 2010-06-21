@@ -20,8 +20,9 @@ to the pane that changes when different tabs are clicked.")
               (:li :style "display: block; clear: both;"
                    :field (ps:symbol-to-js-string :clear-tab))))
 
-	(:div :field (ps:symbol-to-js-string :tab-content)
-              :class "tab-content")))))
+	(:div :class "tab-content"
+              :field (ps:symbol-to-js-string :tab-content)
+              )))))
 
 (defsail tab-sail ()
   ((content :initarg :content :initform nil :accessor tab-content)

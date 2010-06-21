@@ -36,12 +36,6 @@ has good way of doing CSS already."
      :border-top (raw (format nil "1px solid ~A" *tab-border-color*))) ;#ffc89c" ;set border COLOR as desired
 
     ((ancestor :ul.tabs :li)
-     ;; these lines used to be part of :li :a
-     :border (raw (format nil "1px solid ~A" *tab-border-color*))   ; set border COLOR as desired; usually matches border color specified in #tabnav
-     :-moz-border-radius "4px 4px 0 0"
-     :-webkit-border-radius "4px 4px 0 0"
-     :padding (raw (format nil "~Apx .7em 0" (+ 0 *tab-vertical-padding*))) ; set padding (tab size) as desired; FIRST number must change with respect to padding-top (X) above
-     :border-bottom "0"
      ;; end
      
      :margin-right "1em"
@@ -61,7 +55,15 @@ has good way of doing CSS already."
      :top "1px")
 
     ((ancestor :ul.tabs :li :a)
-     :padding "0 .7em"
+     ;; these lines used to be part of :li :a
+     :border (raw (format nil "1px solid ~A" *tab-border-color*))   ; set border COLOR as desired; usually matches border color specified in #tabnav
+     :-moz-border-radius "4px 4px 0 0"
+     :-webkit-border-radius "4px 4px 0 0"
+     :padding (raw (format nil "~Apx .7em" (+ 0 *tab-vertical-padding*))) ; set padding (tab size) as desired; FIRST number must change with respect to padding-top (X) above
+     :border-bottom "0"
+
+;     :padding "0 .7em"
+     :display "block"
      :background-color "#ffe8d7" ; set unselected tab background color as desired
      :color "#666" ; set unselected tab link color as desired
      :margin-right "7px" ; set additional spacing between tabs as desired
@@ -136,7 +138,8 @@ has good way of doing CSS already."
     ((ancestor :.snazzy-form :.input)
      :margin "2px 0 0 10.5em" :display "block" :padding "0 0 .2em 0")
 
-    ((ancestor :.snazzy-form  :.form-field :input)
+    ((or (ancestor :.snazzy-form  :.form-field :input)
+         (ancestor :.snazzy-form  :.form-field :textarea))
      :border "solid 1px #aacfe4")
 
     ((ancestor :.snazzy-form :.form-field :input)

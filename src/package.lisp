@@ -48,6 +48,7 @@
 	   #:snazzy-form-field-sail
 	   #:snazzy-form-field
 	   #:snazzy-form-field-input
+	   #:snazzy-form-form
            #:snazzy-form-input-value
 	   #:input-sail
 	   #:abstract-input-sail
