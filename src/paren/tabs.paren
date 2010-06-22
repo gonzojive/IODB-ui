@@ -6,13 +6,15 @@
 
 (defsail tab-container-sail ()
   ((tabs :initform (array) :reader tabs)
-   (selected-tab :initform nil :accessor selected-tab))
+   (selected-tab :initform nil :accessor selected-tab)
+   (style :initform nil :accessor tabs-style :initarg :style))
   (:documentation "This is a sail that contains the entire tab system, from the tab bar
 to the pane that changes when different tabs are clicked.")
   (:html
    #L(cl-who:with-html-output-to-string (stream)
        (:div
 	:class "tab-sail"
+        :field (ps:symbol-to-js-string :root)
 	(:div
 	 :class "tab-header"
 	 (:ul :class "tabs" :field (ps:symbol-to-js-string :tabs)
@@ -27,6 +29,17 @@ to the pane that changes when different tabs are clicked.")
 (defsail tab-sail ()
   ((content :initarg :content :initform nil :accessor tab-content)
    (header :initarg :header :initform nil :accessor tab-header)))
+
+(defmethod post-render ((sail tab-container-sail))
+  (call-next-method)
+  (let ((clz (or (tabs-style sail)
+                 (if (paren-psos::is-subclass-of tab-container-sail (class-of (sail-supersail sail)))
+                     "subtabs"
+                     "classic-tabs"))))
+    
+    (pslog "CSS Class for sail %o: %o" sail clz)
+    (when clz
+      (elem-add-class (sail-field sail :root) clz))))
 
 (defmethod initialize-instance :after ((sail tab-sail) &key container)
   (setf (sail-supersail sail) container))

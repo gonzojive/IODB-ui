@@ -24,37 +24,36 @@ has good way of doing CSS already."
     ((ancestor :.autocomplete :li.selected) :background-color "#0066ff" :color "#dddddd")
 
     ;;; Tabs
-    (:ul.tabs
+    ((direct-ancestor :.classic-tabs :.tab-header :ul.tabs)
      :text-align "left" ; set to left, right or center
      :margin ".5em 0 .5em 0" ; set margins as desired
      :font-weight "bold"
      :list-style-type "none"
      :padding (raw (format nil "~Apx .4em 3px .5em" (+ 1 *tab-vertical-padding*)))) ; THIRD number must change with respect to padding-top (X) below
 
-    (:.tab-content
+    ((direct-ancestor :.classic-tabs :.tab-content)
      :clear "both"
      :border-top (raw (format nil "1px solid ~A" *tab-border-color*))) ;#ffc89c" ;set border COLOR as desired
 
-    ((ancestor :ul.tabs :li)
+    ((direct-ancestor :.classic-tabs :.tab-header :ul.tabs :li)
      ;; end
      
      :margin-right "1em"
      :display "block"
      :float "left")
-;     :margin "3px 0 -3px 0")
 
-    ((ancestor :ul.tabs :li.selected)
+    ((direct-ancestor :.classic-tabs :.tab-header :ul.tabs  :li.selected)
      :border-bottom-width "0px" ; set border color to page background color
 ;     :background-color (raw *tab-border-color*)
-     );"#fff") ; set background color to match above border color
+     );; set background color to match above border color
 
-    ((ancestor :ul.tabs :li.selected :a)
+    ((direct-ancestor :.classic-tabs :.tab-header :ul.tabs  :li.selected :a)
      :background-color (raw *tab-selected-background-color*) ;"#fff" ; set selected tab background color as desired
      :color "#000" ; set selected tab link color as desired
      :position "relative"
      :top "1px")
 
-    ((ancestor :ul.tabs :li :a)
+    ((direct-ancestor :.classic-tabs :.tab-header :ul.tabs  :li :a)
      ;; these lines used to be part of :li :a
      :border (raw (format nil "1px solid ~A" *tab-border-color*))   ; set border COLOR as desired; usually matches border color specified in #tabnav
      :-moz-border-radius "4px 4px 0 0"
@@ -70,8 +69,39 @@ has good way of doing CSS already."
      :text-decoration "none"
      :border-bottom "none")
 
-    ((ancestor :ul.tabs :a\:hover)
+    ((direct-ancestor :.classic-tabs :.tab-header :ul.tabs  :li  :a\:hover)
       :background "white")
+
+    ;; subtabs
+    ((direct-ancestor :.subtabs :.tab-header :ul.tabs)
+     :text-align "left"
+     :margin ".5em 0 0 0"
+     :padding "0"
+     :list-style-type "none"
+     :font-size "90%")
+
+    ((direct-ancestor :.subtabs :.tab-header :ul.tabs :li)
+     ;; end
+     :margin-right "1em"
+     :display "inline")
+
+    ((direct-ancestor :.subtabs :.tab-header :ul.tabs  :li.selected)
+     :font-weight "bold")
+
+    ((direct-ancestor :.subtabs :.tab-header :ul.tabs  :li :a)
+     :text-decoration "none")
+
+    ((direct-ancestor :.subtabs :.tab-header :ul.tabs  :li :a\:hover)
+     :text-decoration "underline")
+
+    ((direct-ancestor :.subtabs :.tab-header :ul.tabs  :li.selected :a)
+     :color "#111111"
+     :text-decoration "none")
+
+    ((direct-ancestor :.subtabs :.tab-header :ul.tabs  :li.selected :a\:hover)
+     :cursor "default"
+     :text-decoration "none")
+    
     
     ;;;; modal view
     (:.modal-background :position "absolute"
