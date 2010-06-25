@@ -173,6 +173,9 @@
 	:field (ps:symbol-to-js-string :root)
 	:type "text"))))
 
+(defmethod input-value ((sail snazzy-form-field-sail))
+  (return (input-value (snazzy-form-field-input sail))))
+
 (defmethod input-value ((sail input-sail))
   (return (slot-value (sail-field sail :root) 'js-global::value)))
 
