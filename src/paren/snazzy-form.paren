@@ -443,8 +443,8 @@ input."))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Hinting input box
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defun make-input-hint (elem &key hint-class)
-  (let ((text (@ elem 'jsns::title)))
+(defun make-input-hint (elem &key hint-class text)
+  (let ((text (or text (@ elem 'jsns::title))))
     (symbol-macrolet ((input-value (slot-value elem 'jsns::value)))
       (register-dom-event-handler elem "focus"
                                 (lambda ()
