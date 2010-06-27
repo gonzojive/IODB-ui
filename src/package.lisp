@@ -40,6 +40,9 @@
 	   ;; modal sails
 	   #:present-modal-sail
 	   #:dismiss-modal-sail
+
+           ;; hinting input box
+           #:make-input-hint
 	   
 	   ;; snazzy form
 	   #:snazzy-form

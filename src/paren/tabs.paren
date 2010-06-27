@@ -4,6 +4,9 @@
 ;;; http://www.htmldog.com/articles/tabs/ -- great basic implementation
 ;;; http://unraveled.com/publications/assets/css_tabs/index4.html -- original inspiration
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Tabs container sail
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defsail tab-container-sail ()
   ((tabs :initform (array) :reader tabs)
    (selected-tab :initform nil :accessor selected-tab)
@@ -26,6 +29,9 @@ to the pane that changes when different tabs are clicked.")
               :field (ps:symbol-to-js-string :tab-content)
               )))))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; A tab itself
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defsail tab-sail ()
   ((content :initarg :content :initform nil :accessor tab-content)
    (header :initarg :header :initform nil :accessor tab-header)))
@@ -90,7 +96,7 @@ to the pane that changes when different tabs are clicked.")
 (defmethod add-tab ((container tab-container-sail) &key title content (selected? t) align)
   (add-subsail container content :group :tab-content)
   (hide-sail content)
-  (let* ((header (make-instance tab-header-sail :title title))
+  (let* ((header (make-instance tab-header-sail :title title :fields (create :title title)))
 	 (tab (make-instance tab-sail :content content :header header :container container)))
     (push-on-end tab (tabs container))
     (add-subsail container header :group :tabs) ; :position "before")
@@ -107,6 +113,9 @@ to the pane that changes when different tabs are clicked.")
       (select-tab container tab))
     (return tab)))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Tab header sail: The container of the buttons you click on to switch tabs
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defsail tab-header-sail (standard-sail event-emitter)
   ((tab-title :initarg :title :initform ""))
   (:documentation "This is the sail that contains an individual tab heading in the tab system")
@@ -134,4 +143,5 @@ to the pane that changes when different tabs are clicked.")
    (:root "click" (ev)
 	  (stop-dom-event ev)
 	  (make-instance tab-selected-event :origin sail :tab-header sail))))
-  
+
+      
