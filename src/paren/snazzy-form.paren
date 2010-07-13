@@ -40,6 +40,12 @@
 	       (:div :class "spacer" " "))))))
 
 (defmethod post-render ((sail snazzy-form-sail))
+
+  (setf-field
+   (sail)
+   :title (snazzy-form-title sail)
+   :subtitle (snazzy-form-subtitle sail))
+
   (setf (slot-value sail 'view 'dom :submit-button 'js-global::value)
 	(or (snazzy-form-submit-text sail) "Submit"))
   (setf (slot-value sail 'view 'dom :cancel-button 'js-global::value)
@@ -124,6 +130,10 @@
 
 (defmethod post-render ((sail snazzy-form-field-sail))
 
+  (setf-field
+   (sail)
+   :title (snazzy-form-field-title sail))
+
   (add-subsail sail (snazzy-form-field-input sail)
 	       :group :input-area)
 
@@ -150,6 +160,11 @@
 	(:h3
 	 :field (ps:symbol-to-js-string :title)
 	 " ")))))
+
+(defmethod post-render ((sail snazzy-form-fieldset-sail))
+  (setf-field
+   (sail)
+   :title (snazzy-form-fieldset-title sail)))
 
 #+nil
 (defmethod add-to-json-object ((sail snazzy-form-field-sail) obj)
