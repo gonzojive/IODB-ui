@@ -392,6 +392,10 @@
 (defmethod input-value ((sail textarea-input-sail))
   (return (slot-value (sail-field sail :root) 'js-global::value)))
 
+(defmethod set-input-value ((sail textarea-input-sail) v)
+  (setf (slot-value (sail-field sail :root) 'js-global::value)
+        v))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; An input that consistes of multiple, ordered inputs beneath it.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
