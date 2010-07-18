@@ -40,7 +40,7 @@
   ()
   (:documentation "This is the sail that contains an individual tab heading in the tab system")
   (:html
-   #L(cl-who:with-html-output-to-string (stream)
+   (cl-who:with-html-output-to-string (stream)
        (:div :field "root"
 	     :class "autocomplete"
 	     (:ul :field "items"

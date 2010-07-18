@@ -4,22 +4,22 @@
 (defsail datetime-range-picker-sail ()
   ()
   (:html
-   #L(cl-who:with-html-output-to-string (stream)
-       (:div :field (ps:symbol-to-js-string :container)
-	     (:input :field (ps:symbol-to-js-string :from-date-input)
-		     :type "text")
-	     "  "
-	     (:input :field (ps:symbol-to-js-string :from-time-input)
-		     :type "text")
-	     "  "
-	     (:input :field (ps:symbol-to-js-string :to-date-input)
-		     :type "text")
-	     "  "
-	     (:input :field (ps:symbol-to-js-string :to-time-input)
-		     :type "text")
-	     "  "
-	     (:input :field (ps:symbol-to-js-string :all-day-checkbox)
-		     :type "checkbox")))))
+   (cl-who:with-html-output-to-string (stream)
+     (:div :field (ps:symbol-to-js-string :container)
+           (:input :field (ps:symbol-to-js-string :from-date-input)
+                   :type "text")
+           "  "
+           (:input :field (ps:symbol-to-js-string :from-time-input)
+                   :type "text")
+           "  "
+           (:input :field (ps:symbol-to-js-string :to-date-input)
+                   :type "text")
+           "  "
+           (:input :field (ps:symbol-to-js-string :to-time-input)
+                   :type "text")
+           "  "
+           (:input :field (ps:symbol-to-js-string :all-day-checkbox)
+                   :type "checkbox")))))
 
 (defmethod fill-in-content ((sail datetime-range-picker-sail))
   (setf (slot-value sail 'view 'dom :message :inner-h-t-m-l)

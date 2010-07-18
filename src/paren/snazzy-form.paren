@@ -12,7 +12,7 @@
    (form-components :initarg :form-components :initform (array) :accessor snazzy-form-components))
   (:documentation "A good-looking form.")
   (:html
-   #L(cl-who:with-html-output-to-string (stream)
+   (cl-who:with-html-output-to-string (stream)
        (:div :field "root"
 	     :class "snazzy-form"
 	     (:form
@@ -111,7 +111,7 @@
 	  :initform (make-instance input-sail)))
   (:documentation "A good-looking form field.")
   (:html
-   #L(cl-who:with-html-output-to-string (stream)
+   (cl-who:with-html-output-to-string (stream)
        (:div
 	:class "form-field"
 	(:label
@@ -153,7 +153,7 @@
   ((title :initarg :title :accessor snazzy-form-fieldset-title))
   (:documentation "A good-looking form field.")
   (:html
-   #L(cl-who:with-html-output-to-string (stream)
+   (cl-who:with-html-output-to-string (stream)
        (:div
 	:class "field-set"
 	:field (ps:symbol-to-js-string :root)
@@ -183,7 +183,7 @@
 (defsail input-sail (abstract-input-sail)
   ((name :initform nil :accessor input-sail-name :initarg :name))
   (:html
-   #L(cl-who:with-html-output-to-string (stream)
+   (cl-who:with-html-output-to-string (stream)
        (:input
 	:field (ps:symbol-to-js-string :root)
 	:type "text"))))
@@ -219,7 +219,7 @@
   ((checked? :initarg checked? :initform nil :accessor input-checked?)
    (note :initarg :note :initform "" :accessor input-note))
   (:html
-   #L(cl-who:with-html-output-to-string (stream)
+   (cl-who:with-html-output-to-string (stream)
        (:div :field (ps:symbol-to-js-string :container)
 	     (:input :field (ps:symbol-to-js-string :root) :type "checkbox")
 	     (:span :field (ps:symbol-to-js-string :note) "")))))
@@ -235,7 +235,7 @@
   ((label :initarg :label :initform nil :accessor checkbox-label)
    (value :initarg :value :initform nil :accessor checkbox-value))
   (:html
-   #L(cl-who:with-html-output-to-string (stream)
+   (cl-who:with-html-output-to-string (stream)
        (:span
 	:class "checkbox-item"
 	(:input :field (ps:symbol-to-js-string :input) :type "checkbox")
@@ -249,7 +249,7 @@
 (defsail checkbox-input-sail (abstract-input-sail)
   ()
   (:html
-   #L(cl-who:with-html-output-to-string (stream)
+   (cl-who:with-html-output-to-string (stream)
        (:div :field (ps:symbol-to-js-string :container)
 	     "  "))))
 
@@ -280,7 +280,7 @@
   ((label :initarg :label :initform nil :accessor radio-label)
    (value :initarg :value :initform nil :accessor radio-value))
   (:html
-   #L(cl-who:with-html-output-to-string (stream)
+   (cl-who:with-html-output-to-string (stream)
        (:span
 	:class "checkbox-item"
 	(:input :field (ps:symbol-to-js-string :input) :type "radio")
@@ -294,7 +294,7 @@
 (defsail radio-input-sail (abstract-input-sail)
   ()
   (:html
-   #L(cl-who:with-html-output-to-string (stream)
+   (cl-who:with-html-output-to-string (stream)
        (:div :field (ps:symbol-to-js-string :container)
 	     "  "))))
 
@@ -332,7 +332,7 @@
   ((label :initarg :label :initform nil :accessor radio-label)
    (value :initarg :value :initform nil :accessor radio-value))
   (:html
-   #L(cl-who:with-html-output-to-string (stream)
+   (cl-who:with-html-output-to-string (stream)
        (:span
 	:class "checkbox-item"
 	(:input :field (ps:symbol-to-js-string :input) :type "radio")
@@ -343,7 +343,7 @@
 (defsail select-input-sail (abstract-input-sail)
   ((input-value-map :initform (create) :accessor input-value-map))
   (:html
-   #L(cl-who:with-html-output-to-string (stream)
+   (cl-who:with-html-output-to-string (stream)
        (:select :field (ps:symbol-to-js-string :container)
 	     "  "))))
 
@@ -385,7 +385,7 @@
 (defsail textarea-input-sail (abstract-input-sail)
   ()
   (:html
-   #L(cl-who:with-html-output-to-string (stream)
+   (cl-who:with-html-output-to-string (stream)
        (:textarea
 	:rows "3" :cols "70"))))
 
@@ -402,7 +402,7 @@
 (defsail compound-input-sail (abstract-input-sail)
   ()
   (:html
-   #L(cl-who:with-html-output-to-string (stream)
+   (cl-who:with-html-output-to-string (stream)
        (:div :class "compound"
 	     (:div
 	      :field (ps:symbol-to-js-string :inputs)
@@ -443,7 +443,7 @@ input."))
 (defsail multicomplete-list-item ()
   ((value :initform nil :accessor list-item-value :initarg :value))
   (:html
-   #L(cl-who:with-html-output-to-string (stream)
+   (cl-who:with-html-output-to-string (stream)
        (:li :class "multicomplete-li"
             (:span :field (ps:symbol-to-js-string :text)
                    "text")
@@ -454,7 +454,7 @@ input."))
   ()
   (:css " ")
   (:html
-   #L(cl-who:with-html-output-to-string (stream)
+   (cl-who:with-html-output-to-string (stream)
        (:ul :class "multicomplete"
             :field (ps:symbol-to-js-string :list)
             " "))))

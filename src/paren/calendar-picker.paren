@@ -3,7 +3,7 @@
 (defsail calendar-sail ()
   ()
   (:html
-   #L(cl-who:with-html-output-to-string (stream)
+   (cl-who:with-html-output-to-string (stream)
        (:div
  :class "cal"
  (:div

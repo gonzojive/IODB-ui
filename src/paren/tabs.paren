@@ -14,7 +14,7 @@
   (:documentation "This is a sail that contains the entire tab system, from the tab bar
 to the pane that changes when different tabs are clicked.")
   (:html
-   #L(cl-who:with-html-output-to-string (stream)
+   (cl-who:with-html-output-to-string (stream)
        (:div
 	:class "tab-sail"
         :field (ps:symbol-to-js-string :root)
@@ -120,7 +120,7 @@ to the pane that changes when different tabs are clicked.")
   ((tab-title :initarg :title :initform ""))
   (:documentation "This is the sail that contains an individual tab heading in the tab system")
   (:html
-   #L(cl-who:with-html-output-to-string (stream)
+   (cl-who:with-html-output-to-string (stream)
        (:li :field (ps:symbol-to-js-string :root)
             (:a :field (ps:symbol-to-js-string :title)
 		:href "#"

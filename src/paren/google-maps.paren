@@ -52,7 +52,7 @@
   ((gmap :initarg :gmap :accessor google-map))
   (:documentation "A google maps.")
   (:html
-   #L(cl-who:with-html-output-to-string (stream)
+   (cl-who:with-html-output-to-string (stream)
        (:div :field (ps:symbol-to-js-string :root)
 	     :class "google-map"
 	     " "))))
