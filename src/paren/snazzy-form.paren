@@ -465,15 +465,16 @@ input."))
 (defun make-input-hint (elem &key hint-class text)
   (let ((text (or text (@ elem 'jsns::title))))
     (symbol-macrolet ((input-value (slot-value elem 'jsns::value)))
-      (register-dom-event-handler elem "focus"
-                                (lambda ()
-                                  (when (=== text input-value)
-                                    (setf input-value ""))
-                                  (when hint-class
-                                    (elem-remove-class elem hint-class))))
-      (register-dom-event-handler elem "blur"
-                                (lambda ()
-                                  (when (=== "" input-value)
-                                    (setf input-value text)
-                                    (when hint-class
-                                      (elem-add-class elem hint-class))))))))
+      (flet ((on-focus ()
+               (when (=== text input-value)
+                 (setf input-value ""))
+               (when hint-class
+                 (elem-remove-class elem hint-class)))
+             (on-blur ()
+               (when (=== "" input-value)
+                 (setf input-value text)
+                 (when hint-class
+                   (elem-add-class elem hint-class)))))
+        (register-dom-event-handler elem "focus" #'on-focus)
+        (register-dom-event-handler elem "blur" #'on-blur)
+        (on-blur)))))

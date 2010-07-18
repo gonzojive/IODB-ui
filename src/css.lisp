@@ -56,8 +56,8 @@ has good way of doing CSS already."
     ((direct-ancestor :.classic-tabs :.tab-header :ul.tabs  :li :a)
      ;; these lines used to be part of :li :a
      :border (raw (format nil "1px solid ~A" *tab-border-color*))   ; set border COLOR as desired; usually matches border color specified in #tabnav
-     :-moz-border-radius "4px 4px 0 0"
-     :-webkit-border-radius "4px 4px 0 0"
+     :-moz-border-radius "3px 3px 0 0"
+     :-webkit-border-radius "3px 3px 0 0"
      :padding (raw (format nil "~Apx .7em" (+ 0 *tab-vertical-padding*))) ; set padding (tab size) as desired; FIRST number must change with respect to padding-top (X) above
      :border-bottom "0"
 
