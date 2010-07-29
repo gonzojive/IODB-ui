@@ -43,7 +43,6 @@ to the pane that changes when different tabs are clicked.")
                      "subtabs"
                      "classic-tabs"))))
     
-    (pslog "CSS Class for sail %o: %o" sail clz)
     (when clz
       (elem-add-class (sail-field sail :root) clz))))
 

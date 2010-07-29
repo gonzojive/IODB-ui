@@ -31,7 +31,7 @@
   (let ((sup (sail-supersail sail)))
     (when sup
       (remove-from-supersail sail)
-      (pslog "Removing %o 's dom nodes" sup)
+      ;(pslog "Removing %o 's dom nodes" sup)
       (remove-dom-nodes sup))))
 
 
@@ -44,7 +44,7 @@
   ;; adjust background
   (let* ((sz (calculate-page-size))
 	 (height (elt sz 1)))
-    (log (+ "Adjusting modal sail to height " height))
+    ;(log (+ "Adjusting modal sail to height " height))
     (setf (slot-value (sail-field sail :background) 'js-global::style 'js-global::height)
 	  (+ "" height "px"))))
 
@@ -62,7 +62,7 @@
   (setf (slot-value (sail-field sail :container) "className") (container-class sail))
   (setf (slot-value (sail-field sail :container) 'js-global::style 'js-global::z-index)
 	(incf *modal-zindex*))
-  (pslog "Rendered bg %o and container %o" (sail-field sail :background) (sail-field sail :container))
+  ;(pslog "Rendered bg %o and container %o" (sail-field sail :background) (sail-field sail :container))
 
   (adjust-sail-size sail)
   (register-dom-event-handler (toplevel-window) "resize"
