@@ -126,13 +126,18 @@
 	(:div :class "input"
 	      :field (ps:symbol-to-js-string :input-area)
 	 
-	 " ")))))
+	 " ")
+	(:div :class "error"
+	      :field (ps:symbol-to-js-string :error)
+              " "))))
+  (:css ".form-field < .error { color: #ff0000; }"))
 
 (defmethod post-render ((sail snazzy-form-field-sail))
 
   (setf-field
    (sail)
-   :title (snazzy-form-field-title sail))
+   :title (snazzy-form-field-title sail)
+   :note (snazzy-form-field-note sail))
 
   (add-subsail sail (snazzy-form-field-input sail)
 	       :group :input-area)
@@ -181,12 +186,16 @@
 (defsail abstract-input-sail () ())
 
 (defsail input-sail (abstract-input-sail)
-  ((name :initform nil :accessor input-sail-name :initarg :name))
+  ((name :initform nil :accessor input-sail-name :initarg :name)
+   (type :initform "text" :accessor input-sail-type :initarg :type))
   (:html
    (cl-who:with-html-output-to-string (stream)
        (:input
 	:field (ps:symbol-to-js-string :root)
 	:type "text"))))
+
+(defmethod post-render ((sail input-sail))
+  (write-attributes (sail-field sail :root) (create "type" (input-sail-type sail))))
 
 (defmethod input-value ((sail snazzy-form-field-sail))
   (return (input-value (snazzy-form-field-input sail))))

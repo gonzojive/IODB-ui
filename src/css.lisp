@@ -168,6 +168,10 @@ has good way of doing CSS already."
     ((ancestor :.snazzy-form :.input)
      :margin "2px 0 0 10.5em" :display "block" :padding "0 0 .2em 0")
 
+    ((ancestor :.snazzy-form :.error)
+     :margin "5px 0 0 10.5em" :display "block" :padding "0 0 .2em 0"
+     :color "#ff0000")
+
     ((or (ancestor :.snazzy-form  :.form-field :input)
          (ancestor :.snazzy-form  :.form-field :textarea))
      :border "solid 1px #aacfe4")

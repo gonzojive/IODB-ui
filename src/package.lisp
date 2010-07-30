@@ -49,6 +49,8 @@
 	   #:snazzy-form-sail
 	   #:snazzy-form-sail-view
 	   #:snazzy-form-field-sail
+           #:snazzy-form-fieldset-sail
+           #:snazzy-form-fieldset-sail-view
 	   #:snazzy-form-field
 	   #:snazzy-form-field-input
 	   #:snazzy-form-form
