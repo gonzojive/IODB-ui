@@ -2,44 +2,44 @@
 
 (defun detect-browser ()
   (let ((candidates
-	 (list (list (slot-value js-global::navigator :user-agent)
+	 (list (list (slot-value js-global::navigator 'jsns::user-agent)
 		     "MSIE"
 		     "Explorer"
 		     "MSIE")
-	       (list (slot-value js-global::navigator :user-agent)
+	       (list (slot-value js-global::navigator 'jsns::user-agent)
 		     "Chrome"
 		     "Chrome")
-	       (list (slot-value js-global::navigator :user-agent)
+	       (list (slot-value js-global::navigator 'jsns::user-agent)
 		     "Firefox"
 		     "Firefox")
-	       (list (slot-value js-global::navigator :user-agent)
+	       (list (slot-value js-global::navigator 'jsns::user-agent)
 		     "OmniWeb"
 		     "OmniWeb/")
-	       (list (slot-value js-global::navigator :vendor)
+	       (list (slot-value js-global::navigator 'jsns::vendor)
 		     "Apple"
 		     "Safari"
 		     "Version")
-	       (list (slot-value js-global::navigator :vendor)
+	       (list (slot-value js-global::navigator 'jsns::vendor)
 		     "KDE"
 		     "Konqueror")
 	       (list nil
 		     nil
 		     "Opera"
 		     nil
-		     (slot-value js-global:window :opera))
-	       (list (slot-value js-global::navigator :vendor)
+		     (slot-value js-global:window 'jsns::opera))
+	       (list (slot-value js-global::navigator 'jsns::vendor)
 		     "iCab"
 		     "iCab")
-	       (list (slot-value js-global::navigator :vendor)
+	       (list (slot-value js-global::navigator 'jsns::vendor)
 		     "Camino"
 		     "Camino")
-	       (list (slot-value js-global::navigator :user-agent)
+	       (list (slot-value js-global::navigator 'jsns::user-agent)
 		     "Netscape"
 		     "Netscape")
-	       (list (slot-value js-global::navigator :user-agent)
+	       (list (slot-value js-global::navigator 'jsns::user-agent)
 		     "Netscape"
 		     "Netscape")
-	       (list (slot-value js-global::navigator :user-agent)
+	       (list (slot-value js-global::navigator 'jsns::user-agent)
 		     "Mozilla"
 		     "Netscape"
 		     "Mozilla"))))
@@ -50,7 +50,7 @@
 	     (version-search-string (or (aref candidate 3) browser-id))
 	     (prop (aref candidate 4))
 	     (is-browser? (or (and data-string
-				   (!== -1 (methcall :index-of data-string data-substring)))
+				   (!== -1 (methcall 'jsns::index-of data-string data-substring)))
 				   prop))
 	     (version (and is-browser? (parse-version data-string version-search-string))))
 	(when is-browser?
@@ -59,32 +59,32 @@
       (return (create :os (detect-os)))))
 
 (defun parse-version (data-string version-search-string)
-  (let ((index (methcall :index-of data-string version-search-string)))
+  (let ((index (methcall 'jsns::index-of data-string version-search-string)))
     (when (=== -1 index)
 	(return nil))
     (let ((version-str
-	   (methcall :substring data-string (+ index 1 (length version-search-string)))))
+	   (methcall 'jsns::substring data-string (+ index 1 (length version-search-string)))))
       (when version-str
 	(return (js-global::parse-float version-str))))))
 
 (defun detect-os ()
-  (let ((candidates (list (list (slot-value js-global::navigator :platform)
+  (let ((candidates (list (list (slot-value js-global::navigator 'jsns::platform)
 				"Win"
 				"Windows")
-			  (list (slot-value js-global::navigator :platform)
+			  (list (slot-value js-global::navigator 'jsns::platform)
 				"Mac"
 				"Mac")
-			  (list (slot-value js-global::navigator :platform)
+			  (list (slot-value js-global::navigator 'jsns::platform)
 				"iPhone"
 				"iPhone/iPod")
-			  (list (slot-value js-global::navigator :user-agent)
+			  (list (slot-value js-global::navigator 'jsns::user-agent)
 				"Linux"
 				"Linux"))))
     (dolist (candidate candidates)
       (let* ((data-string (aref candidate 0))
 	     (search-string (aref candidate 1))
 	     (os-id (aref candidate 2))
-	     (is-os? (and data-string (!== -1 (methcall :index-of data-string search-string)))))
+	     (is-os? (and data-string (!== -1 (methcall 'jsns::index-of data-string search-string)))))
 	(when is-os?
 	  (return os-id))))))
 
